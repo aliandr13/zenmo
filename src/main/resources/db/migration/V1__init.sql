@@ -12,7 +12,7 @@ CREATE TABLE account (
     user_id UUID NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     type TEXT NOT NULL,
-    currency CHAR(3) NOT NULL,
+    currency VARCHAR(3) NOT NULL,
     credit_limit NUMERIC(19, 2),
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -40,7 +40,7 @@ CREATE TABLE txn (
     transaction_date DATE NOT NULL,
     post_date DATE,
     amount NUMERIC(19, 2) NOT NULL,
-    currency CHAR(3) NOT NULL,
+    currency VARCHAR(3) NOT NULL,
     description TEXT NOT NULL,
     merchant TEXT,
     status TEXT NOT NULL,
