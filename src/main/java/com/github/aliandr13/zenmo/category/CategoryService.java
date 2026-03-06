@@ -1,0 +1,69 @@
+package com.github.aliandr13.zenmo.category;
+
+import com.github.aliandr13.zenmo.category.dto.CategoryRequest;
+import com.github.aliandr13.zenmo.category.dto.CategoryResponse;
+import com.github.aliandr13.zenmo.common.NotFoundException;
+import com.github.aliandr13.zenmo.security.AuthFacade;
+import com.github.aliandr13.zenmo.security.CurrentUser;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class CategoryService {
+
+    private final CategoryRepository categoryRepository;
+    private final AuthFacade authFacade;
+
+    public CategoryService(CategoryRepository categoryRepository, AuthFacade authFacade) {
+        this.categoryRepository = categoryRepository;
+        this.authFacade = authFacade;
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> list() {
+        CurrentUser user = authFacade.currentUser();
+        return categoryRepository.findByUserIdOrderByName(user.userId())
+                .stream()
+                .map(CategoryResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public CategoryResponse get(UUID id) {
+        CurrentUser user = authFacade.currentUser();
+        Category category = categoryRepository.findByIdAndUserId(id, user.userId())
+                .orElseThrow(() -> new NotFoundException("Category not found"));
+        return CategoryResponse.from(category);
+    }
+
+    @Transactional
+    public CategoryResponse create(CategoryRequest request) {
+        CurrentUser user = authFacade.currentUser();
+        if (categoryRepository.existsByUserIdAndNameIgnoreCase(user.userId(), request.name())) {
+            throw new IllegalArgumentException("Category with this name already exists");
+        }
+        Category category = new Category(
+                UUID.randomUUID(),
+                user.userId(),
+                request.name(),
+                request.parentId(),
+                request.color(),
+                Instant.now()
+        );
+        categoryRepository.save(category);
+        return CategoryResponse.from(category);
+    }
+
+    @Transactional
+    public void delete(UUID id) {
+        CurrentUser user = authFacade.currentUser();
+        if (!categoryRepository.existsByIdAndUserId(id, user.userId())) {
+            throw new NotFoundException("Category not found");
+        }
+        categoryRepository.deleteById(id);
+    }
+}

@@ -1,0 +1,13 @@
+package com.github.aliandr13.zenmo;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class ZenmoApplicationTests {
+
+    @Test
+    void contextLoads() {
+    }
+
+}
