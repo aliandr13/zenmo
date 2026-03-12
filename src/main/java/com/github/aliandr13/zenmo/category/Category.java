@@ -1,11 +1,23 @@
 package com.github.aliandr13.zenmo.category;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name = "category")
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Category {
 
     @Id
@@ -25,39 +37,4 @@ public class Category {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
-    protected Category() {
-    }
-
-    public Category(UUID id, UUID userId, String name, UUID parentId, String color, Instant createdAt) {
-        this.id = id;
-        this.userId = userId;
-        this.name = name;
-        this.parentId = parentId;
-        this.color = color;
-        this.createdAt = createdAt;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public UUID getUserId() {
-        return userId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public UUID getParentId() {
-        return parentId;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
 }

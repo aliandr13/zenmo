@@ -1,10 +1,10 @@
 package com.github.aliandr13.zenmo.account;
 
+import com.github.aliandr13.zenmo.account.dto.AccountRequest;
+import com.github.aliandr13.zenmo.account.dto.AccountResponse;
 import com.github.aliandr13.zenmo.auth.dto.LoginRequest;
 import com.github.aliandr13.zenmo.auth.dto.RegisterRequest;
 import com.github.aliandr13.zenmo.auth.dto.TokensResponse;
-import com.github.aliandr13.zenmo.account.dto.AccountRequest;
-import com.github.aliandr13.zenmo.account.dto.AccountResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -18,7 +18,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class AccountControllerIntegrationTest {
+class AccountControllerIT {
 
     @LocalServerPort
     private int port;
@@ -72,6 +72,6 @@ class AccountControllerIntegrationTest {
                 .body(new ParameterizedTypeReference<List<AccountResponse>>() {});
 
         assertThat(list).hasSize(1);
-        assertThat(list.get(0).id()).isEqualTo(created.id());
+        assertThat(list.getFirst().id()).isEqualTo(created.id());
     }
 }

@@ -4,12 +4,18 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.UUID;
 
+@Data
 @Entity
 @Table(name = "app_user")
+@AllArgsConstructor
+@NoArgsConstructor
 public class AppUser {
     @Id
     private UUID id;
@@ -23,30 +29,5 @@ public class AppUser {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
-    protected AppUser() {
-    }
-
-    public AppUser(UUID id, String email, String passwordHash, Instant createdAt) {
-        this.id = id;
-        this.email = email;
-        this.passwordHash = passwordHash;
-        this.createdAt = createdAt;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
 }
 

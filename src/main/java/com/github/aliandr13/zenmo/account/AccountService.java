@@ -43,16 +43,16 @@ public class AccountService {
     @Transactional
     public AccountResponse create(AccountRequest request) {
         CurrentUser user = authFacade.currentUser();
-        Account account = new Account(
-                UUID.randomUUID(),
-                user.userId(),
-                request.name(),
-                request.type(),
-                request.currency(),
-                request.creditLimit(),
-                false,
-                Instant.now()
-        );
+        Account account = Account.builder()
+                .id(UUID.randomUUID())
+                .userId(user.userId())
+                .name(request.name())
+                .type(request.type())
+                .currency(request.currency())
+                .creditLimit(request.creditLimit())
+                .archived(false)
+                .createdAt(Instant.now())
+                .build();
         accountRepository.save(account);
         return AccountResponse.from(account);
     }

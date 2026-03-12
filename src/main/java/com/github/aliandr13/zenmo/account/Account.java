@@ -1,12 +1,21 @@
 package com.github.aliandr13.zenmo.account;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name = "account")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Account {
 
     @Id
@@ -33,51 +42,4 @@ public class Account {
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
-
-    protected Account() {
-    }
-
-    public Account(UUID id, UUID userId, String name, AccountType type, String currency,
-                   BigDecimal creditLimit, boolean archived, Instant createdAt) {
-        this.id = id;
-        this.userId = userId;
-        this.name = name;
-        this.type = type;
-        this.currency = currency;
-        this.creditLimit = creditLimit;
-        this.archived = archived;
-        this.createdAt = createdAt;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public UUID getUserId() {
-        return userId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public AccountType getType() {
-        return type;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public BigDecimal getCreditLimit() {
-        return creditLimit;
-    }
-
-    public boolean isArchived() {
-        return archived;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
 }

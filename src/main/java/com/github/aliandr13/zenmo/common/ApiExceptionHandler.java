@@ -2,6 +2,7 @@ package com.github.aliandr13.zenmo.common;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -14,6 +15,7 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
@@ -48,18 +50,12 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleOther(Exception ex, HttpServletRequest request) {
+        log.error("Unexpected error: {} at {}", ex.getMessage(), request.getRequestURL(), ex);
         return error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error", request.getRequestURI(), null);
     }
 
     private ResponseEntity<ApiError> error(HttpStatus status, String message, String path, Map<String, String> fieldErrors) {
-        ApiError body = new ApiError(
-                Instant.now(),
-                status.value(),
-                status.getReasonPhrase(),
-                message,
-                path,
-                fieldErrors
-        );
+        ApiError body = new ApiError(Instant.now(), status.value(), status.getReasonPhrase(), message, path, fieldErrors);
         return ResponseEntity.status(status).body(body);
     }
 }

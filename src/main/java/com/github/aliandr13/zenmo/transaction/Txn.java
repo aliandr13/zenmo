@@ -1,6 +1,11 @@
 package com.github.aliandr13.zenmo.transaction;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -8,6 +13,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "txn")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Txn {
 
     @Id
@@ -48,76 +57,4 @@ public class Txn {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
-    protected Txn() {
-    }
-
-    public Txn(UUID id, UUID userId, UUID accountId, UUID categoryId,
-               LocalDate transactionDate, LocalDate postDate, BigDecimal amount, String currency,
-               String description, String merchant, TransactionStatus status, String notes, Instant createdAt) {
-        this.id = id;
-        this.userId = userId;
-        this.accountId = accountId;
-        this.categoryId = categoryId;
-        this.transactionDate = transactionDate;
-        this.postDate = postDate;
-        this.amount = amount;
-        this.currency = currency;
-        this.description = description;
-        this.merchant = merchant;
-        this.status = status;
-        this.notes = notes;
-        this.createdAt = createdAt;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public UUID getUserId() {
-        return userId;
-    }
-
-    public UUID getAccountId() {
-        return accountId;
-    }
-
-    public UUID getCategoryId() {
-        return categoryId;
-    }
-
-    public LocalDate getTransactionDate() {
-        return transactionDate;
-    }
-
-    public LocalDate getPostDate() {
-        return postDate;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getMerchant() {
-        return merchant;
-    }
-
-    public TransactionStatus getStatus() {
-        return status;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
 }

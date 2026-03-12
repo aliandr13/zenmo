@@ -25,13 +25,13 @@ public class TxnController {
 
     @GetMapping
     public ResponseEntity<Page<TxnResponse>> list(
-            @RequestParam(required = false) UUID accountId,
+            @RequestParam(required = false) String accountId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
             Pageable pageable
     ) {
         return ResponseEntity.ok(txnService.list(
-                Optional.ofNullable(accountId),
+                Optional.ofNullable(accountId).map(UUID::fromString),
                 Optional.ofNullable(fromDate),
                 Optional.ofNullable(toDate),
                 pageable
