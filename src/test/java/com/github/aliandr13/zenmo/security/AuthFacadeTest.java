@@ -2,6 +2,7 @@ package com.github.aliandr13.zenmo.security;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -37,7 +38,7 @@ class AuthFacadeTest {
         SecurityContextHolder.clearContext();
 
         assertThatThrownBy(authFacade::currentUser)
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(AuthenticationCredentialsNotFoundException.class)
                 .hasMessageContaining("No authenticated user in context");
     }
 
@@ -47,8 +48,8 @@ class AuthFacadeTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         assertThatThrownBy(authFacade::currentUser)
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Unexpected principal type");
+                .isInstanceOf(AuthenticationCredentialsNotFoundException.class)
+                .hasMessageContaining("Not authenticated with a valid token");
     }
 }
 

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -49,6 +50,22 @@ class ApiExceptionHandlerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().message()).contains("invalid");
+    }
+
+    @Test
+    void handleAuthenticationCredentialsNotFoundReturnsUnauthorized() {
+        AuthenticationCredentialsNotFoundException ex =
+                new AuthenticationCredentialsNotFoundException("no auth");
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        given(request.getRequestURI()).willReturn("/api/auth/me");
+
+        ResponseEntity<ApiError> response = handler.handleAuthenticationCredentialsNotFound(ex, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        ApiError body = response.getBody();
+        assertThat(body).isNotNull();
+        assertThat(body.status()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
+        assertThat(body.message()).isEqualTo("Unauthorized");
     }
 
     @Test
