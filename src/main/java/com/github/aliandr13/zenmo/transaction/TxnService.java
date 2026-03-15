@@ -6,15 +6,17 @@ import com.github.aliandr13.zenmo.security.AuthFacade;
 import com.github.aliandr13.zenmo.security.CurrentUser;
 import com.github.aliandr13.zenmo.transaction.dto.TxnRequest;
 import com.github.aliandr13.zenmo.transaction.dto.TxnResponse;
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.Optional;
-import java.util.UUID;
-
+/**
+ * Application service for transaction operations.
+ */
 @Service
 public class TxnService {
 
@@ -22,39 +24,63 @@ public class TxnService {
     private final AccountRepository accountRepository;
     private final AuthFacade authFacade;
 
-    public TxnService(TxnRepository txnRepository, AccountRepository accountRepository, AuthFacade authFacade) {
+    /**
+     * Constructor.
+     */
+    public TxnService(
+            TxnRepository txnRepository,
+            AccountRepository accountRepository,
+            AuthFacade authFacade) {
         this.txnRepository = txnRepository;
         this.accountRepository = accountRepository;
         this.authFacade = authFacade;
     }
 
+    /**
+     * Returns a page of transactions for the current user, optionally filtered.
+     */
     @Transactional(readOnly = true)
-    public Page<TxnResponse> list(Optional<UUID> accountId, Optional<LocalDate> fromDate, Optional<LocalDate> toDate, Pageable pageable) {
+    public Page<TxnResponse> list(
+            Optional<UUID> accountId,
+            Optional<LocalDate> fromDate,
+            Optional<LocalDate> toDate,
+            Pageable pageable) {
         CurrentUser user = authFacade.currentUser();
         if (accountId.isPresent()) {
             if (!accountRepository.existsByIdAndUserId(accountId.get(), user.userId())) {
                 throw new NotFoundException("Account not found");
             }
-            return txnRepository.findByUserIdAndAccountIdOrderByTransactionDateDescCreatedAtDesc(user.userId(), accountId.get(), pageable)
+            return txnRepository
+                    .findByUserIdAndAccountIdOrderByTransactionDateDescCreatedAtDesc(
+                            user.userId(), accountId.get(), pageable)
                     .map(TxnResponse::from);
         }
         if (fromDate.isPresent() && toDate.isPresent()) {
-            return txnRepository.findByUserIdAndTransactionDateBetweenOrderByTransactionDateDescCreatedAtDesc(
+            return txnRepository
+                    .findByUserIdAndTransactionDateBetweenOrderByTransactionDateDescCreatedAtDesc(
                             user.userId(), fromDate.get(), toDate.get(), pageable)
                     .map(TxnResponse::from);
         }
-        return txnRepository.findByUserIdOrderByTransactionDateDescCreatedAtDesc(user.userId(), pageable)
+        return txnRepository
+                .findByUserIdOrderByTransactionDateDescCreatedAtDesc(user.userId(), pageable)
                 .map(TxnResponse::from);
     }
 
+    /**
+     * Returns a single transaction by id for the current user.
+     */
     @Transactional(readOnly = true)
     public TxnResponse get(UUID id) {
         CurrentUser user = authFacade.currentUser();
-        Txn txn = txnRepository.findByIdAndUserId(id, user.userId())
+        Txn txn = txnRepository
+                .findByIdAndUserId(id, user.userId())
                 .orElseThrow(() -> new NotFoundException("Transaction not found"));
         return TxnResponse.from(txn);
     }
 
+    /**
+     * Creates a new transaction for the current user.
+     */
     @Transactional
     public TxnResponse create(TxnRequest request) {
         CurrentUser user = authFacade.currentUser();
@@ -80,6 +106,9 @@ public class TxnService {
         return TxnResponse.from(txn);
     }
 
+    /**
+     * Deletes a transaction by id for the current user.
+     */
     @Transactional
     public void delete(UUID id) {
         CurrentUser user = authFacade.currentUser();

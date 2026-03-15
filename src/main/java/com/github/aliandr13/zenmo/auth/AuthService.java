@@ -8,13 +8,6 @@ import com.github.aliandr13.zenmo.security.JwtProperties;
 import com.github.aliandr13.zenmo.security.JwtService;
 import com.github.aliandr13.zenmo.user.AppUser;
 import com.github.aliandr13.zenmo.user.AppUserRepository;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -22,7 +15,16 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.UUID;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service for registration, login, refresh tokens and JWT issuance.
+ */
 @Service
 public class AuthService {
 
@@ -34,11 +36,11 @@ public class AuthService {
     private final JwtProperties jwtProperties;
     private final SecureRandom secureRandom = new SecureRandom();
 
-    public AuthService(AppUserRepository users,
-                       RefreshTokenRepository refreshTokens,
-                       PasswordEncoder passwordEncoder,
-                       AuthenticationManager authenticationManager,
-                       JwtService jwtService,
+    /**
+     * Constructor.
+     */
+    public AuthService(AppUserRepository users, RefreshTokenRepository refreshTokens, PasswordEncoder passwordEncoder,
+                       AuthenticationManager authenticationManager, JwtService jwtService,
                        JwtProperties jwtProperties) {
         this.users = users;
         this.refreshTokens = refreshTokens;
@@ -48,34 +50,38 @@ public class AuthService {
         this.jwtProperties = jwtProperties;
     }
 
+    /**
+     * Registers a new user and returns tokens.
+     */
     @Transactional
     public TokensResponse register(RegisterRequest request) {
         if (users.existsByEmailIgnoreCase(request.email())) {
             throw new IllegalArgumentException("Email already registered");
         }
 
-        AppUser user = new AppUser(
-                UUID.randomUUID(),
-                request.email().toLowerCase(),
-                passwordEncoder.encode(request.password()),
-                Instant.now()
-        );
+        AppUser user = new AppUser(UUID.randomUUID(), request.email().toLowerCase(),
+                passwordEncoder.encode(request.password()), Instant.now());
         users.save(user);
 
         return issueTokens(user);
     }
 
+    /**
+     * Authenticates and returns tokens.
+     */
     @Transactional
     public TokensResponse login(LoginRequest request) {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
         String email = auth.getName();
-        AppUser user = users.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+        AppUser user = users.findByEmailIgnoreCase(email).orElseThrow(() -> new NotFoundException("User not found"));
         return issueTokens(user);
     }
 
+    /**
+     * Issues new tokens using a valid refresh token.
+     */
     @Transactional
     public TokensResponse refresh(String refreshToken) {
         String hash = hashToken(refreshToken);
@@ -86,8 +92,7 @@ public class AuthService {
             throw new IllegalArgumentException("Refresh token expired or revoked");
         }
 
-        AppUser user = users.findById(stored.getUserId())
-                .orElseThrow(() -> new NotFoundException("User not found"));
+        AppUser user = users.findById(stored.getUserId()).orElseThrow(() -> new NotFoundException("User not found"));
 
         // Rotate token: delete old and issue new
         refreshTokens.delete(stored);
@@ -109,14 +114,7 @@ public class AuthService {
         Instant now = Instant.now();
         Instant exp = now.plusSeconds(jwtProperties.refreshTtlSeconds());
 
-        RefreshToken entity = new RefreshToken(
-                UUID.randomUUID(),
-                userId,
-                hash,
-                exp,
-                null,
-                now
-        );
+        RefreshToken entity = new RefreshToken(UUID.randomUUID(), userId, hash, exp, null, now);
         refreshTokens.save(entity);
         return token;
     }

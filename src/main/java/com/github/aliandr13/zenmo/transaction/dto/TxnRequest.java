@@ -4,11 +4,13 @@ import com.github.aliandr13.zenmo.transaction.TransactionStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * Request DTO for creating or updating a transaction.
+ */
 public record TxnRequest(
         @NotNull UUID accountId,
         UUID categoryId,

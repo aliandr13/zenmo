@@ -5,8 +5,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+/**
+ * Provides the current authenticated user from the security context.
+ */
 @Component
 public class AuthFacade {
+    /**
+     * Returns the current user; throws if not authenticated with a JWT.
+     */
     public CurrentUser currentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || auth.getPrincipal() == null) {
