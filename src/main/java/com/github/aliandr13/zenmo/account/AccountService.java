@@ -64,6 +64,8 @@ public class AccountService {
                 .type(request.type())
                 .currency(request.currency())
                 .creditLimit(request.creditLimit())
+                .paymentDueDay(request.paymentDueDay())
+                .closingDay(request.closingDay())
                 .archived(false)
                 .createdAt(Instant.now())
                 .build();

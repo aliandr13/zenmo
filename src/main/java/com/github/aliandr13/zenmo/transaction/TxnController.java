@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -45,8 +46,10 @@ public class TxnController {
             LocalDate fromDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate toDate,
-            Pageable pageable
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
     ) {
+        Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(txnService.list(
                 Optional.ofNullable(accountId).map(UUID::fromString),
                 Optional.ofNullable(fromDate),

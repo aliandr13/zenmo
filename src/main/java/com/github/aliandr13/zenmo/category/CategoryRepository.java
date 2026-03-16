@@ -3,12 +3,11 @@ package com.github.aliandr13.zenmo.category;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * JPA repository for categories.
+ * Repository for categories.
  */
-public interface CategoryRepository extends JpaRepository<Category, UUID> {
+public interface CategoryRepository {
 
     /**
      * Returns categories for a user, ordered by name.
@@ -29,4 +28,14 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
      * Returns whether a category with the given name exists for the user.
      */
     boolean existsByUserIdAndNameIgnoreCase(UUID userId, String name);
+
+    /**
+     * Saves a category.
+     */
+    void save(Category category);
+
+    /**
+     * Deletes a category by id.
+     */
+    void deleteById(UUID id);
 }

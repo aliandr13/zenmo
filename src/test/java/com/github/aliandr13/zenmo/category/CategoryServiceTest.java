@@ -5,17 +5,15 @@ import com.github.aliandr13.zenmo.category.dto.CategoryResponse;
 import com.github.aliandr13.zenmo.common.NotFoundException;
 import com.github.aliandr13.zenmo.security.AuthFacade;
 import com.github.aliandr13.zenmo.security.CurrentUser;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -81,7 +79,6 @@ class CategoryServiceTest {
         UUID userId = UUID.randomUUID();
         given(authFacade.currentUser()).willReturn(new CurrentUser(userId, "user@example.com"));
         given(categoryRepository.existsByUserIdAndNameIgnoreCase(userId, "Food")).willReturn(false);
-        given(categoryRepository.save(any(Category.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         CategoryRequest request = new CategoryRequest("Food", null, "#ffffff");
 

@@ -6,6 +6,12 @@ import com.github.aliandr13.zenmo.security.AuthFacade;
 import com.github.aliandr13.zenmo.security.CurrentUser;
 import com.github.aliandr13.zenmo.transaction.dto.TxnRequest;
 import com.github.aliandr13.zenmo.transaction.dto.TxnResponse;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,14 +21,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -138,7 +136,6 @@ class TxnServiceTest {
         UUID accountId = UUID.randomUUID();
         given(authFacade.currentUser()).willReturn(new CurrentUser(userId, "user@example.com"));
         given(accountRepository.existsByIdAndUserId(accountId, userId)).willReturn(true);
-        given(txnRepository.save(any(Txn.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         TxnRequest request = new TxnRequest(
                 accountId,

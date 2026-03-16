@@ -14,6 +14,8 @@ public record AccountResponse(UUID id,
                               AccountType type,
                               String currency,
                               BigDecimal creditLimit,
+                              Integer paymentDueDay,
+                              Integer closingDay,
                               boolean archived,
                               Instant createdAt) {
     /**
@@ -21,7 +23,8 @@ public record AccountResponse(UUID id,
      */
     public static AccountResponse from(Account a) {
         return new AccountResponse(a.getId(), a.getName(), a.getType(),
-                a.getCurrency(), a.getCreditLimit(), a.isArchived(),
-                a.getCreatedAt());
+                a.getCurrency(), a.getCreditLimit(),
+                a.getPaymentDueDay(), a.getClosingDay(),
+                a.isArchived(), a.getCreatedAt());
     }
 }

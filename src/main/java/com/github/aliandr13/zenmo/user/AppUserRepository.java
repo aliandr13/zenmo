@@ -2,12 +2,12 @@ package com.github.aliandr13.zenmo.user;
 
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * JPA repository for users.
+ * Repository for users.
  */
-public interface AppUserRepository extends JpaRepository<AppUser, UUID> {
+public interface AppUserRepository {
+
     /**
      * Finds a user by email (case-insensitive).
      */
@@ -17,4 +17,14 @@ public interface AppUserRepository extends JpaRepository<AppUser, UUID> {
      * Returns whether a user exists with the given email (case-insensitive).
      */
     boolean existsByEmailIgnoreCase(String email);
+
+    /**
+     * Finds a user by id.
+     */
+    Optional<AppUser> findById(UUID id);
+
+    /**
+     * Saves a user.
+     */
+    void save(AppUser user);
 }

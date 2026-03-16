@@ -5,12 +5,11 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * JPA repository for transactions.
+ * Repository for transactions.
  */
-public interface TxnRepository extends JpaRepository<Txn, UUID> {
+public interface TxnRepository {
 
     /**
      * Returns a page of transactions for a user, newest first.
@@ -38,4 +37,14 @@ public interface TxnRepository extends JpaRepository<Txn, UUID> {
      * Returns whether a transaction exists for the given id and user.
      */
     boolean existsByIdAndUserId(UUID id, UUID userId);
+
+    /**
+     * Saves a transaction.
+     */
+    void save(Txn txn);
+
+    /**
+     * Deletes a transaction by id.
+     */
+    void deleteById(UUID id);
 }

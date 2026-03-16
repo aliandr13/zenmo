@@ -12,7 +12,7 @@ JAVA_OPTS="
 -server
 -Xms128m
 -Xmx256m
--XX:MaxMetaspaceSize=96m
+-XX:MaxMetaspaceSize=128m
 -XX:ReservedCodeCacheSize=64m
 -Xss256k
 -XX:+UseSerialGC

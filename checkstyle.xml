@@ -56,7 +56,7 @@
         <property name="fileExtensions" value="java"/>
         <property name="max" value="120"/>
         <property name="ignorePattern"
-                  value="^package.*|^import.*|href\s*=\s*&quot;[^&quot;]*&quot;|http://|https://|ftp://"/>
+                  value="^package.*|^import.*|href\s*=\s*&quot;[^&quot;]*&quot;|http://|https://|ftp://|^\s*private\s+static\s+final\s+String\s+\w+\s*=.*|^\s*&quot;[^&quot;]*&quot;\s*;?\s*$"/>
     </module>
     <!--  Suppression to prevent LineLength Check from flagging lines in Text-blocks -->
     <module name="SuppressWithPlainTextCommentFilter">

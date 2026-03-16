@@ -3,12 +3,11 @@ package com.github.aliandr13.zenmo.account;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * JPA repository for accounts.
+ * Repository for accounts.
  */
-public interface AccountRepository extends JpaRepository<Account, UUID> {
+public interface AccountRepository {
 
     /**
      * Returns accounts for a user, newest first.
@@ -24,4 +23,14 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
      * Returns whether an account exists for the given id and user.
      */
     boolean existsByIdAndUserId(UUID id, UUID userId);
+
+    /**
+     * Saves an account.
+     */
+    void save(Account account);
+
+    /**
+     * Deletes an account by id.
+     */
+    void deleteById(UUID id);
 }

@@ -5,17 +5,15 @@ import com.github.aliandr13.zenmo.account.dto.AccountResponse;
 import com.github.aliandr13.zenmo.common.NotFoundException;
 import com.github.aliandr13.zenmo.security.AuthFacade;
 import com.github.aliandr13.zenmo.security.CurrentUser;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -48,6 +46,8 @@ class AccountServiceTest {
                 .type(AccountType.CHECKING)
                 .currency("USD")
                 .creditLimit(null)
+                .paymentDueDay(null)
+                .closingDay(1)
                 .archived(false)
                 .createdAt(Instant.now())
                 .build();
@@ -72,6 +72,8 @@ class AccountServiceTest {
                 .type(AccountType.CHECKING)
                 .currency("USD")
                 .creditLimit(null)
+                .paymentDueDay(null)
+                .closingDay(1)
                 .archived(false)
                 .createdAt(Instant.now())
                 .build();
@@ -100,9 +102,7 @@ class AccountServiceTest {
         UUID userId = UUID.randomUUID();
         given(authFacade.currentUser()).willReturn(new CurrentUser(userId, "user@example.com"));
 
-        AccountRequest request = new AccountRequest("Main", AccountType.CHECKING, "USD", null);
-
-        given(accountRepository.save(any(Account.class))).willAnswer(invocation -> invocation.getArgument(0));
+        AccountRequest request = new AccountRequest("Main", AccountType.CHECKING, "USD", null, null, 1);
 
         AccountResponse response = accountService.create(request);
 

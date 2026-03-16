@@ -8,6 +8,9 @@ import com.github.aliandr13.zenmo.security.JwtProperties;
 import com.github.aliandr13.zenmo.security.JwtService;
 import com.github.aliandr13.zenmo.user.AppUser;
 import com.github.aliandr13.zenmo.user.AppUserRepository;
+import java.time.Instant;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -18,11 +21,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.time.Instant;
-import java.util.Optional;
-import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,8 +58,6 @@ class AuthServiceTest {
         given(users.existsByEmailIgnoreCase("User@Example.com")).willReturn(false);
         given(passwordEncoder.encode("password123")).willReturn("encoded");
 
-        AppUser saved = new AppUser(UUID.randomUUID(), "user@example.com", "encoded", Instant.now());
-        given(users.save(any(AppUser.class))).willReturn(saved);
         given(jwtService.generateAccessToken(any(UUID.class), any(String.class))).willReturn("access-token");
 
         TokensResponse tokens = authService.register(request);

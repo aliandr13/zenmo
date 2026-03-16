@@ -2,13 +2,12 @@ package com.github.aliandr13.zenmo.auth;
 
 import java.time.Instant;
 import java.util.Optional;
-import java.util.UUID;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * JPA repository for refresh tokens.
+ * Repository for refresh tokens.
  */
-public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID> {
+public interface RefreshTokenRepository {
+
     /**
      * Finds a token by its hash.
      */
@@ -18,5 +17,14 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
      * Deletes expired tokens.
      */
     long deleteByExpiresAtBefore(Instant instant);
-}
 
+    /**
+     * Saves a refresh token.
+     */
+    void save(RefreshToken token);
+
+    /**
+     * Deletes a refresh token.
+     */
+    void delete(RefreshToken token);
+}
