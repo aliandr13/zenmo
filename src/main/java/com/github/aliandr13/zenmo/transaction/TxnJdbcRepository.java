@@ -32,6 +32,11 @@ public class TxnJdbcRepository implements TxnRepository {
             "SELECT * FROM txn WHERE user_id = ? AND account_id = ? ORDER BY transaction_date DESC, created_at DESC LIMIT ? OFFSET ?";
     private static final String COUNT_BY_USER_AND_ACCOUNT =
             "SELECT COUNT(1) FROM txn WHERE user_id = ? AND account_id = ?";
+    private static final String INSERT =
+            """
+                    INSERT INTO txn (id, user_id, account_id, category_id, transaction_date, post_date, amount, currency, description, merchant, status, notes, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -66,10 +71,7 @@ public class TxnJdbcRepository implements TxnRepository {
 
     @Override
     public void save(Txn txn) {
-        String sql = "INSERT INTO txn (id, user_id, account_id, category_id, transaction_date, post_date, "
-                + "amount, currency, description, merchant, status, notes, created_at) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql,
+        jdbcTemplate.update(INSERT,
                 txn.getId(),
                 txn.getUserId(),
                 txn.getAccountId(),

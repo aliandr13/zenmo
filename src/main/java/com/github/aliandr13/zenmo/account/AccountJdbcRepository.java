@@ -22,8 +22,8 @@ public class AccountJdbcRepository implements AccountRepository {
     private static final String DELETE_BY_ID = "DELETE FROM account WHERE id = ?";
     private static final String INSERT =
             """
-                    INSERT INTO account (id, user_id, name, type, currency, credit_limit,
-                    payment_due_day, closing_day, archived, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO account (id, user_id, name, type, currency, credit_limit, payment_due_day, closing_day, archived, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """;
 
     private final JdbcTemplate jdbcTemplate;
