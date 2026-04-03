@@ -1,5 +1,6 @@
-package com.github.aliandr13.zenmo.transaction;
+package com.github.aliandr13.zenmo.controller;
 
+import com.github.aliandr13.zenmo.transaction.TxnService;
 import com.github.aliandr13.zenmo.transaction.dto.TxnRequest;
 import com.github.aliandr13.zenmo.transaction.dto.TxnResponse;
 import jakarta.validation.Valid;

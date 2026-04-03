@@ -1,8 +1,10 @@
-package com.github.aliandr13.zenmo.category;
+package com.github.aliandr13.zenmo.service;
 
+import com.github.aliandr13.zenmo.category.Category;
 import com.github.aliandr13.zenmo.category.dto.CategoryRequest;
 import com.github.aliandr13.zenmo.category.dto.CategoryResponse;
 import com.github.aliandr13.zenmo.common.NotFoundException;
+import com.github.aliandr13.zenmo.repository.CategoryRepository;
 import com.github.aliandr13.zenmo.security.AuthFacade;
 import com.github.aliandr13.zenmo.security.CurrentUser;
 import java.time.Instant;

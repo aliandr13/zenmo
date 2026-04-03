@@ -1,5 +1,8 @@
-package com.github.aliandr13.zenmo.auth;
+package com.github.aliandr13.zenmo.service;
 
+import com.github.aliandr13.zenmo.auth.AuthService;
+import com.github.aliandr13.zenmo.auth.RefreshToken;
+import com.github.aliandr13.zenmo.auth.RefreshTokenRepository;
 import com.github.aliandr13.zenmo.auth.dto.LoginRequest;
 import com.github.aliandr13.zenmo.auth.dto.RegisterRequest;
 import com.github.aliandr13.zenmo.auth.dto.TokensResponse;
@@ -26,7 +29,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -54,14 +59,16 @@ class AuthServiceTest {
 
     @Test
     void registerCreatesUserAndIssuesTokensWhenEmailNotTaken() {
+        // GIVEN
         RegisterRequest request = new RegisterRequest("User@Example.com", "password123");
-        given(users.existsByEmailIgnoreCase("User@Example.com")).willReturn(false);
+        given(users.existsByEmail("user@example.com")).willReturn(false);
         given(passwordEncoder.encode("password123")).willReturn("encoded");
-
         given(jwtService.generateAccessToken(any(UUID.class), any(String.class))).willReturn("access-token");
 
+        // WHEN
         TokensResponse tokens = authService.register(request);
 
+        // THEN
         assertThat(tokens.accessToken()).isEqualTo("access-token");
         assertThat(tokens.refreshToken()).isNotBlank();
 
@@ -75,7 +82,7 @@ class AuthServiceTest {
     @Test
     void registerThrowsWhenEmailAlreadyRegistered() {
         RegisterRequest request = new RegisterRequest("user@example.com", "password123");
-        given(users.existsByEmailIgnoreCase("user@example.com")).willReturn(true);
+        given(users.existsByEmail("user@example.com")).willReturn(true);
 
         assertThatThrownBy(() -> authService.register(request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -92,7 +99,7 @@ class AuthServiceTest {
         given(authenticationManager.authenticate(any(Authentication.class))).willReturn(auth);
 
         AppUser user = new AppUser(UUID.randomUUID(), "user@example.com", "hashed", Instant.now());
-        given(users.findByEmailIgnoreCase("user@example.com")).willReturn(Optional.of(user));
+        given(users.findByEmail("user@example.com")).willReturn(Optional.of(user));
         given(jwtService.generateAccessToken(user.getId(), user.getEmail())).willReturn("access-token");
 
         TokensResponse tokens = authService.login(request);
@@ -106,7 +113,7 @@ class AuthServiceTest {
         LoginRequest request = new LoginRequest("missing@example.com", "password123");
         Authentication auth = new UsernamePasswordAuthenticationToken("missing@example.com", "password123");
         given(authenticationManager.authenticate(any(Authentication.class))).willReturn(auth);
-        given(users.findByEmailIgnoreCase("missing@example.com")).willReturn(Optional.empty());
+        given(users.findByEmail("missing@example.com")).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.login(request))
                 .isInstanceOf(NotFoundException.class)

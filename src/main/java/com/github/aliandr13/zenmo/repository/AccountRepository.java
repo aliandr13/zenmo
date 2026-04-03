@@ -1,5 +1,6 @@
-package com.github.aliandr13.zenmo.account;
+package com.github.aliandr13.zenmo.repository;
 
+import com.github.aliandr13.zenmo.account.Account;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -12,7 +13,7 @@ public interface AccountRepository {
     /**
      * Returns accounts for a user, newest first.
      */
-    List<Account> findByUserIdOrderByCreatedAtDesc(UUID userId);
+    List<Account> findByUserIdOrderByCreatedDesc(UUID userId);
 
     /**
      * Finds an account by id and owner user.

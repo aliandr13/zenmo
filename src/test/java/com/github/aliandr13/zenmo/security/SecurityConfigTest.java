@@ -2,15 +2,13 @@ package com.github.aliandr13.zenmo.security;
 
 import com.github.aliandr13.zenmo.user.AppUser;
 import com.github.aliandr13.zenmo.user.AppUserRepository;
+import java.time.Instant;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.time.Instant;
-import java.util.Optional;
-import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
@@ -26,7 +24,7 @@ class SecurityConfigTest {
         AppUserRepository repo = mock(AppUserRepository.class);
         UUID userId = UUID.randomUUID();
         AppUser user = new AppUser(userId, "user@example.com", "hashed", Instant.now());
-        given(repo.findByEmailIgnoreCase("user@example.com")).willReturn(Optional.of(user));
+        given(repo.findByEmail("user@example.com")).willReturn(Optional.of(user));
 
         var uds = securityConfig.userDetailsService(repo);
         UserDetails details = uds.loadUserByUsername("user@example.com");
@@ -41,7 +39,7 @@ class SecurityConfigTest {
     @Test
     void userDetailsServiceThrowsWhenUserNotFound() {
         AppUserRepository repo = mock(AppUserRepository.class);
-        given(repo.findByEmailIgnoreCase("missing@example.com")).willReturn(Optional.empty());
+        given(repo.findByEmail("missing@example.com")).willReturn(Optional.empty());
 
         var uds = securityConfig.userDetailsService(repo);
 

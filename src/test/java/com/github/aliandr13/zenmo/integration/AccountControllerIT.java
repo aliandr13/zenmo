@@ -1,4 +1,4 @@
-package com.github.aliandr13.zenmo.account;
+package com.github.aliandr13.zenmo.integration;
 
 import com.github.aliandr13.zenmo.account.dto.AccountRequest;
 import com.github.aliandr13.zenmo.account.dto.AccountResponse;

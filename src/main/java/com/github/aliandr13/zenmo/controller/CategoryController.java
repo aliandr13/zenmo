@@ -1,7 +1,8 @@
-package com.github.aliandr13.zenmo.category;
+package com.github.aliandr13.zenmo.controller;
 
 import com.github.aliandr13.zenmo.category.dto.CategoryRequest;
 import com.github.aliandr13.zenmo.category.dto.CategoryResponse;
+import com.github.aliandr13.zenmo.service.CategoryService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;

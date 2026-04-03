@@ -1,4 +1,4 @@
-package com.github.aliandr13.zenmo;
+package com.github.aliandr13.zenmo.integration;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

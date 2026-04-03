@@ -33,10 +33,7 @@ public class TxnJdbcRepository implements TxnRepository {
     private static final String COUNT_BY_USER_AND_ACCOUNT =
             "SELECT COUNT(1) FROM txn WHERE user_id = ? AND account_id = ?";
     private static final String INSERT =
-            """
-                    INSERT INTO txn (id, user_id, account_id, category_id, transaction_date, post_date, amount, currency, description, merchant, status, notes, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """;
+            "INSERT INTO txn (id, user_id, account_id, category_id, transaction_date, post_date, amount, currency, description, merchant, status, notes, created_at)VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final JdbcTemplate jdbcTemplate;
 

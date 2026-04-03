@@ -11,12 +11,12 @@ public interface AppUserRepository {
     /**
      * Finds a user by email (case-insensitive).
      */
-    Optional<AppUser> findByEmailIgnoreCase(String email);
+    Optional<AppUser> findByEmail(String email);
 
     /**
      * Returns whether a user exists with the given email (case-insensitive).
      */
-    boolean existsByEmailIgnoreCase(String email);
+    boolean existsByEmail(String email);
 
     /**
      * Finds a user by id.

@@ -1,5 +1,7 @@
-package com.github.aliandr13.zenmo.account;
+package com.github.aliandr13.zenmo.repository;
 
+import com.github.aliandr13.zenmo.account.Account;
+import com.github.aliandr13.zenmo.account.AccountType;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -21,15 +23,12 @@ public class AccountJdbcRepository implements AccountRepository {
     private static final String COUNT_BY_ID_AND_USER_ID = "SELECT COUNT(id) FROM account WHERE id = ? AND user_id = ?";
     private static final String DELETE_BY_ID = "DELETE FROM account WHERE id = ?";
     private static final String INSERT =
-            """
-                    INSERT INTO account (id, user_id, name, type, currency, credit_limit, payment_due_day, closing_day, archived, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """;
+            "INSERT INTO account (id, user_id, name, type, currency, credit_limit, payment_due_day, closing_day, archived, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public List<Account> findByUserIdOrderByCreatedAtDesc(final UUID userId) {
+    public List<Account> findByUserIdOrderByCreatedDesc(final UUID userId) {
         return jdbcTemplate.query(GET_BY_USER_ID, ROW_MAPPER, userId);
     }
 
@@ -47,7 +46,6 @@ public class AccountJdbcRepository implements AccountRepository {
 
     @Override
     public void save(Account account) {
-
         jdbcTemplate.update(INSERT,
                 account.getId(),
                 account.getUserId(),

@@ -1,8 +1,10 @@
-package com.github.aliandr13.zenmo.account;
+package com.github.aliandr13.zenmo.service;
 
+import com.github.aliandr13.zenmo.account.Account;
 import com.github.aliandr13.zenmo.account.dto.AccountRequest;
 import com.github.aliandr13.zenmo.account.dto.AccountResponse;
 import com.github.aliandr13.zenmo.common.NotFoundException;
+import com.github.aliandr13.zenmo.repository.AccountRepository;
 import com.github.aliandr13.zenmo.security.AuthFacade;
 import com.github.aliandr13.zenmo.security.CurrentUser;
 import java.time.Instant;
@@ -34,7 +36,7 @@ public class AccountService {
     @Transactional(readOnly = true)
     public List<AccountResponse> list() {
         CurrentUser user = authFacade.currentUser();
-        return accountRepository.findByUserIdOrderByCreatedAtDesc(user.userId())
+        return accountRepository.findByUserIdOrderByCreatedDesc(user.userId())
                 .stream()
                 .map(AccountResponse::from)
                 .toList();
@@ -80,7 +82,7 @@ public class AccountService {
     public void delete(UUID id) {
         CurrentUser user = authFacade.currentUser();
         if (!accountRepository.existsByIdAndUserId(id, user.userId())) {
-            throw new NotFoundException("Account not found");
+            throw new NotFoundException("Account not found for current user");
         }
         accountRepository.deleteById(id);
     }

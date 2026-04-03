@@ -1,8 +1,11 @@
-package com.github.aliandr13.zenmo.account;
+package com.github.aliandr13.zenmo.service;
 
+import com.github.aliandr13.zenmo.account.Account;
+import com.github.aliandr13.zenmo.account.AccountType;
 import com.github.aliandr13.zenmo.account.dto.AccountRequest;
 import com.github.aliandr13.zenmo.account.dto.AccountResponse;
 import com.github.aliandr13.zenmo.common.NotFoundException;
+import com.github.aliandr13.zenmo.repository.AccountRepository;
 import com.github.aliandr13.zenmo.security.AuthFacade;
 import com.github.aliandr13.zenmo.security.CurrentUser;
 import java.time.Instant;
@@ -51,7 +54,7 @@ class AccountServiceTest {
                 .archived(false)
                 .createdAt(Instant.now())
                 .build();
-        given(accountRepository.findByUserIdOrderByCreatedAtDesc(userId)).willReturn(List.of(account));
+        given(accountRepository.findByUserIdOrderByCreatedDesc(userId)).willReturn(List.of(account));
 
         List<AccountResponse> result = accountService.list();
 

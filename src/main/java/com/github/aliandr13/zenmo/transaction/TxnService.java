@@ -1,7 +1,7 @@
 package com.github.aliandr13.zenmo.transaction;
 
-import com.github.aliandr13.zenmo.account.AccountRepository;
 import com.github.aliandr13.zenmo.common.NotFoundException;
+import com.github.aliandr13.zenmo.repository.AccountRepository;
 import com.github.aliandr13.zenmo.security.AuthFacade;
 import com.github.aliandr13.zenmo.security.CurrentUser;
 import com.github.aliandr13.zenmo.transaction.dto.TxnRequest;

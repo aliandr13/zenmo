@@ -1,5 +1,6 @@
-package com.github.aliandr13.zenmo.auth;
+package com.github.aliandr13.zenmo.controller;
 
+import com.github.aliandr13.zenmo.auth.AuthService;
 import com.github.aliandr13.zenmo.auth.dto.LoginRequest;
 import com.github.aliandr13.zenmo.auth.dto.RefreshRequest;
 import com.github.aliandr13.zenmo.auth.dto.RegisterRequest;

@@ -1,20 +1,18 @@
-package com.github.aliandr13.zenmo.auth;
+package com.github.aliandr13.zenmo.security;
 
+import com.github.aliandr13.zenmo.auth.AuthService;
 import com.github.aliandr13.zenmo.auth.dto.LoginRequest;
 import com.github.aliandr13.zenmo.auth.dto.RefreshRequest;
 import com.github.aliandr13.zenmo.auth.dto.RegisterRequest;
 import com.github.aliandr13.zenmo.auth.dto.TokensResponse;
-import com.github.aliandr13.zenmo.security.AuthFacade;
-import com.github.aliandr13.zenmo.security.CurrentUser;
+import com.github.aliandr13.zenmo.controller.AuthController;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-
-import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;

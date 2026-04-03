@@ -1,5 +1,6 @@
-package com.github.aliandr13.zenmo.category;
+package com.github.aliandr13.zenmo.repository;
 
+import com.github.aliandr13.zenmo.category.Category;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,14 +20,14 @@ public class CategoryJdbcRepository implements CategoryRepository {
     private static final String INSERT = "INSERT INTO category (id, user_id, name, parent_id, color, created_at) VALUES (?, ?, ?, ?, ?, ?)";
     private static final String COUNT_BY_USER_ID_AND_NAME = "SELECT COUNT(1) FROM category WHERE user_id = ? AND LOWER(name) = LOWER(?)";
     private static final String COUNT_BY_ID_AND_USER = "SELECT COUNT(id) FROM category WHERE id = ? AND user_id = ?";
-    private static final String GET_BY_ID_AND_USER = "SELECT * WHERE id = ? AND user_id = ?";
-    private static final String GET_BY_USERAND = "SELECT * FROM category WHERE user_id = ? ORDER BY name";
+    private static final String GET_BY_ID_AND_USER = "SELECT * FROM category WHERE id = ? AND user_id = ?";
+    private static final String GET_BY_USER = "SELECT * FROM category WHERE user_id = ? ORDER BY name";
 
     private final JdbcTemplate jdbc;
 
     @Override
     public List<Category> findByUserIdOrderByName(UUID userId) {
-        return jdbc.query(GET_BY_USERAND, ROW_MAPPER, userId);
+        return jdbc.query(GET_BY_USER, ROW_MAPPER, userId);
     }
 
     @Override

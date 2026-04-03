@@ -14,6 +14,13 @@
         <spring.boot.version>4.0.3</spring.boot.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
+        <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+        <checkstyle.version>13.3.0</checkstyle.version>
+        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -135,10 +142,11 @@
     <build>
         <finalName>${project.artifactId}</finalName>
         <plugins>
+            <!-- compiler -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <release>${maven.compiler.release}</release>
                     <parameters>true</parameters>
@@ -154,15 +162,36 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
+            <!-- surefire - Unit tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+            </plugin>
+            <!-- failsafe - Integration tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${maven-failsafe-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- checkstyle -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>${maven-checkstyle-plugin.version}</version>
                 <dependencies>
                     <dependency>
                         <groupId>com.puppycrawl.tools</groupId>
                         <artifactId>checkstyle</artifactId>
-                        <version>13.3.0</version>
+                        <version>${checkstyle.version}</version>
                     </dependency>
                 </dependencies>
                 <configuration>
@@ -182,10 +211,91 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- jacoco -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.80</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- pitest -->
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <version>1.23.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-junit5-plugin</artifactId>
+                        <version>1.2.3</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <threads>4</threads>
+                    <avoidCallsTo>
+                        <avoidCallsTo>java.util.loggong</avoidCallsTo>
+                        <avoidCallsTo>org.apache.logging</avoidCallsTo>
+                        <avoidCallsTo>org.apache.commons.logging</avoidCallsTo>
+                        <avoidCallsTo>org.slf4j</avoidCallsTo>
+                    </avoidCallsTo>
+                    <excludedClasses>
+                        <param>com.github.aliandr13.zenmo.integration.*</param>
+                        <param>*IT</param>
+                    </excludedClasses>
+                    <targetClasses>
+                        <param>com.github.aliandr13.zenmo.*</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>com.github.aliandr13.zenmo.service</param>
+                        <param>com.github.aliandr13.zenmo.security</param>
+                        <param>com.github.aliandr13.zenmo.common</param>
+                    </targetTests>
+                    <mutators>STRONGER</mutators>
+                    <testStrengthThreshold>80</testStrengthThreshold>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring.boot.version}</version>
+                <configuration>
+                    <!-- Keep main artifact layout for maven-failsafe; runnable jar is zenmo-exec.jar -->
+                    <classifier>exec</classifier>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>

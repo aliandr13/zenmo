@@ -1,5 +1,6 @@
-package com.github.aliandr13.zenmo.category;
+package com.github.aliandr13.zenmo.repository;
 
+import com.github.aliandr13.zenmo.category.Category;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

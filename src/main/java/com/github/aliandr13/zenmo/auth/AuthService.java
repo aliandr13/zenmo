@@ -8,6 +8,7 @@ import com.github.aliandr13.zenmo.security.JwtProperties;
 import com.github.aliandr13.zenmo.security.JwtService;
 import com.github.aliandr13.zenmo.user.AppUser;
 import com.github.aliandr13.zenmo.user.AppUserRepository;
+import com.github.aliandr13.zenmo.utils.StringUtils;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -15,6 +16,7 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Service for registration, login, refresh tokens and JWT issuance.
  */
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
     private final AppUserRepository users;
@@ -37,29 +40,15 @@ public class AuthService {
     private final SecureRandom secureRandom = new SecureRandom();
 
     /**
-     * Constructor.
-     */
-    public AuthService(AppUserRepository users, RefreshTokenRepository refreshTokens, PasswordEncoder passwordEncoder,
-                       AuthenticationManager authenticationManager, JwtService jwtService,
-                       JwtProperties jwtProperties) {
-        this.users = users;
-        this.refreshTokens = refreshTokens;
-        this.passwordEncoder = passwordEncoder;
-        this.authenticationManager = authenticationManager;
-        this.jwtService = jwtService;
-        this.jwtProperties = jwtProperties;
-    }
-
-    /**
      * Registers a new user and returns tokens.
      */
     @Transactional
     public TokensResponse register(RegisterRequest request) {
-        if (users.existsByEmailIgnoreCase(request.email())) {
+        if (users.existsByEmail(StringUtils.normalize(request.email()))) {
             throw new IllegalArgumentException("Email already registered");
         }
 
-        AppUser user = new AppUser(UUID.randomUUID(), request.email().toLowerCase(),
+        AppUser user = new AppUser(UUID.randomUUID(), StringUtils.normalize(request.email()),
                 passwordEncoder.encode(request.password()), Instant.now());
         users.save(user);
 
@@ -72,10 +61,14 @@ public class AuthService {
     @Transactional
     public TokensResponse login(LoginRequest request) {
         Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.password()));
+                new UsernamePasswordAuthenticationToken(
+                        StringUtils.normalize(request.email()),
+                        request.password()
+                )
+        );
 
         String email = auth.getName();
-        AppUser user = users.findByEmailIgnoreCase(email).orElseThrow(() -> new NotFoundException("User not found"));
+        AppUser user = users.findByEmail(email).orElseThrow(() -> new NotFoundException("User not found"));
         return issueTokens(user);
     }
 

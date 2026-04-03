@@ -1,4 +1,4 @@
-package com.github.aliandr13.zenmo.auth;
+package com.github.aliandr13.zenmo.integration;
 
 import com.github.aliandr13.zenmo.auth.dto.LoginRequest;
 import com.github.aliandr13.zenmo.auth.dto.RegisterRequest;
@@ -10,7 +10,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

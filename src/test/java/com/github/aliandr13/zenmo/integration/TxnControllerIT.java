@@ -1,4 +1,4 @@
-package com.github.aliandr13.zenmo.transaction;
+package com.github.aliandr13.zenmo.integration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.aliandr13.zenmo.account.dto.AccountRequest;
@@ -6,6 +6,7 @@ import com.github.aliandr13.zenmo.account.dto.AccountResponse;
 import com.github.aliandr13.zenmo.auth.dto.LoginRequest;
 import com.github.aliandr13.zenmo.auth.dto.RegisterRequest;
 import com.github.aliandr13.zenmo.auth.dto.TokensResponse;
+import com.github.aliandr13.zenmo.transaction.TransactionStatus;
 import com.github.aliandr13.zenmo.transaction.dto.TxnRequest;
 import com.github.aliandr13.zenmo.transaction.dto.TxnResponse;
 import java.math.BigDecimal;

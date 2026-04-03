@@ -1,7 +1,8 @@
-package com.github.aliandr13.zenmo.account;
+package com.github.aliandr13.zenmo.controller;
 
 import com.github.aliandr13.zenmo.account.dto.AccountRequest;
 import com.github.aliandr13.zenmo.account.dto.AccountResponse;
+import com.github.aliandr13.zenmo.service.AccountService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
