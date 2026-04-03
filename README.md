@@ -6,7 +6,7 @@ authentication.
 ## Tech stack
 
 - **Java 25** · **Spring Boot 4** (Web, Security, Data JPA, Validation)
-- **PostgreSQL** (Flyway migrations)
+- **PostgreSQL** (Flyway migrations via standalone `zenmo-migrate` module)
 - **JWT** (access + refresh tokens, JJWT)
 - **H2** (in-memory, tests only)
 
@@ -36,9 +36,30 @@ CREATE
 EXTENSION IF NOT EXISTS pgcrypto;
 ```
 
-### 2. Configuration
+### 2. Database migrations
 
-Default config is in `src/main/resources/application.properties`. Override as needed (e.g. env or profile):
+SQL migrations live in `zenmo-migrate/src/main/resources/db/migration/`. Apply them **before** starting the API (same
+database the app uses):
+
+```bash
+mvn -pl zenmo-migrate -am package -DskipTests
+java -jar zenmo-migrate/target/zenmo-migrate.jar
+```
+
+Connection defaults match the app (`jdbc:postgresql://localhost:5432/zenmo`, user/password `zenmo`). Override with
+environment variables:
+
+| Variable                    | Description |
+|-----------------------------|-------------|
+| `ZENMO_DATASOURCE_URL`      | JDBC URL    |
+| `ZENMO_DATASOURCE_USERNAME` | DB user     |
+| `ZENMO_DATASOURCE_PASSWORD` | DB password |
+
+Or JVM system properties: `zenmo.datasource.url`, `zenmo.datasource.username`, `zenmo.datasource.password`.
+
+### 3. Configuration
+
+Default config is in `zenmo-app/src/main/resources/application.properties`. Override as needed (e.g. env or profile):
 
 | Property                        | Default                                  | Description                      |
 |---------------------------------|------------------------------------------|----------------------------------|
@@ -51,20 +72,22 @@ Default config is in `src/main/resources/application.properties`. Override as ne
 | `zenmo.jwt.access-ttl-seconds`  | `900`                                    | Access token TTL                 |
 | `zenmo.jwt.refresh-ttl-seconds` | `2592000`                                | Refresh token TTL                |
 
-### 3. Run
+### 4. Run
+
+From the repository root:
 
 ```bash
-mvn spring-boot:run
+mvn -pl zenmo-app spring-boot:run
 ```
 
-Or build and run the JAR:
+Or build and run the API JAR:
 
 ```bash
 mvn clean package -DskipTests
-java -jar target/zenmo-0.0.1-SNAPSHOT.jar
+java -jar zenmo-app/target/zenmo.jar
 ```
 
-### 4. Tests
+### 5. Tests
 
 Tests use an in-memory H2 database (no PostgreSQL required):
 

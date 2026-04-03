@@ -2,10 +2,8 @@ package com.github.aliandr13.zenmo.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
-import org.junit.jupiter.api.Test;
-
 import java.util.UUID;
-
+import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class JwtServiceTest {

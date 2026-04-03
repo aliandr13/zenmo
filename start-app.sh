@@ -4,7 +4,7 @@
 # -------------------------------------------------------------
 
 # Path to your JAR file
-APP_DIR="./target"
+APP_DIR="./zenmo-app/target"
 JAR_FILE="${APP_DIR}/zenmo.jar"
 
 # JVM options optimized for low RAM
