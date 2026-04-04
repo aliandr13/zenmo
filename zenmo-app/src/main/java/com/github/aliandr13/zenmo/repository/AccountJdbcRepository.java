@@ -3,6 +3,7 @@ package com.github.aliandr13.zenmo.repository;
 import com.github.aliandr13.zenmo.account.Account;
 import com.github.aliandr13.zenmo.account.AccountType;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -56,7 +57,7 @@ public class AccountJdbcRepository implements AccountRepository {
                 account.getPaymentDueDay(),
                 account.getClosingDay(),
                 account.isArchived(),
-                account.getCreatedAt()
+                Timestamp.from(account.getCreatedAt())
         );
     }
 

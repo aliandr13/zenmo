@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -51,6 +53,24 @@ public class ApiExceptionHandler {
     public ResponseEntity<ApiError> handleAuthenticationCredentialsNotFound(
             AuthenticationCredentialsNotFoundException ex, HttpServletRequest request) {
         return error(HttpStatus.UNAUTHORIZED, "Unauthorized", request.getRequestURI(), null);
+    }
+
+    /**
+     * Handles failed username/password authentication (wrong password or unknown user).
+     */
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiError> handleBadCredentials(
+            BadCredentialsException ex, HttpServletRequest request) {
+        return error(HttpStatus.UNAUTHORIZED, "Invalid credentials", request.getRequestURI(), null);
+    }
+
+    /**
+     * Handles missing user when not wrapped as {@link BadCredentialsException}.
+     */
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ApiError> handleUsernameNotFound(
+            UsernameNotFoundException ex, HttpServletRequest request) {
+        return error(HttpStatus.UNAUTHORIZED, "Invalid credentials", request.getRequestURI(), null);
     }
 
     /**

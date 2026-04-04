@@ -1,6 +1,7 @@
 package com.github.aliandr13.zenmo.repository;
 
 import com.github.aliandr13.zenmo.category.Category;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -56,7 +57,7 @@ public class CategoryJdbcRepository implements CategoryRepository {
                 category.getName(),
                 category.getParentId(),
                 category.getColor(),
-                category.getCreatedAt());
+                Timestamp.from(category.getCreatedAt()));
     }
 
     @Override

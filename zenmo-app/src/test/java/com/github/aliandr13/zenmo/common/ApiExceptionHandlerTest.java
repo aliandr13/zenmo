@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,7 +21,7 @@ class ApiExceptionHandlerTest {
     private final ApiExceptionHandler handler = new ApiExceptionHandler();
 
     @Test
-    void handleValidationBuildsBadRequestWithFieldErrors() throws Exception {
+    void handleValidationBuildsBadRequestWithFieldErrors() {
         BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(new Object(), "target");
         bindingResult.addError(new FieldError("target", "email", "must not be blank"));
         MethodArgumentNotValidException ex =
@@ -65,6 +67,34 @@ class ApiExceptionHandlerTest {
         assertThat(body).isNotNull();
         assertThat(body.status()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
         assertThat(body.message()).isEqualTo("Unauthorized");
+    }
+
+    @Test
+    void handleBadCredentialsReturnsUnauthorizedWithInvalidCredentialsMessage() {
+        BadCredentialsException ex = new BadCredentialsException("Bad credentials");
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        given(request.getRequestURI()).willReturn("/api/auth/login");
+
+        ResponseEntity<ApiError> response = handler.handleBadCredentials(ex, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        ApiError body = response.getBody();
+        assertThat(body).isNotNull();
+        assertThat(body.message()).isEqualTo("Invalid credentials");
+    }
+
+    @Test
+    void handleUsernameNotFoundReturnsUnauthorizedWithInvalidCredentialsMessage() {
+        UsernameNotFoundException ex = new UsernameNotFoundException("User not found");
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        given(request.getRequestURI()).willReturn("/api/auth/login");
+
+        ResponseEntity<ApiError> response = handler.handleUsernameNotFound(ex, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        ApiError body = response.getBody();
+        assertThat(body).isNotNull();
+        assertThat(body.message()).isEqualTo("Invalid credentials");
     }
 
     @Test

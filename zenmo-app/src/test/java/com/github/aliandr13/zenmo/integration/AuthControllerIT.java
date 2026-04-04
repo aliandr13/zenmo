@@ -1,8 +1,10 @@
 package com.github.aliandr13.zenmo.integration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.aliandr13.zenmo.auth.dto.LoginRequest;
 import com.github.aliandr13.zenmo.auth.dto.RegisterRequest;
 import com.github.aliandr13.zenmo.auth.dto.TokensResponse;
+import com.github.aliandr13.zenmo.common.ApiError;
 import com.github.aliandr13.zenmo.security.CurrentUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,10 +12,14 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AuthControllerIT {
+
+    private static final ObjectMapper JSON = new ObjectMapper().findAndRegisterModules();
 
     @LocalServerPort
     private int port;
@@ -56,6 +62,49 @@ class AuthControllerIT {
 
         assertThat(me).isNotNull();
         assertThat(me.email()).isEqualTo("test@example.com");
+    }
+
+    @Test
+    void loginWithoutRegistrationReturns401InvalidCredentials() {
+        assertLoginReturns401InvalidCredentials(new LoginRequest("notregistered@example.com", "password123"));
+    }
+
+    @Test
+    void loginWithWrongPasswordReturns401InvalidCredentials() {
+        RestClient client = RestClient.create();
+        RegisterRequest registerRequest = new RegisterRequest("wrongpwd-user@example.com", "correct-secret");
+        client.post()
+                .uri("http://localhost:" + port + "/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(registerRequest)
+                .retrieve()
+                .body(TokensResponse.class);
+
+        assertLoginReturns401InvalidCredentials(
+                new LoginRequest("wrongpwd-user@example.com", "wrong-secret"));
+    }
+
+    private void assertLoginReturns401InvalidCredentials(LoginRequest loginRequest) {
+        RestClient client = RestClient.create();
+        assertThatThrownBy(() -> client.post()
+                .uri("http://localhost:" + port + "/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(loginRequest)
+                .retrieve()
+                .body(TokensResponse.class))
+                .isInstanceOfSatisfying(RestClientResponseException.class, ex -> {
+                    assertThat(ex.getStatusCode().value()).isEqualTo(401);
+                    ApiError body = readApiError(ex);
+                    assertThat(body.message()).isEqualTo("Invalid credentials");
+                });
+    }
+
+    private static ApiError readApiError(RestClientResponseException ex) {
+        try {
+            return JSON.readValue(ex.getResponseBodyAsString(), ApiError.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 

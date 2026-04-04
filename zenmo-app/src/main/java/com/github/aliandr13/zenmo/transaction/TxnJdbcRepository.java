@@ -1,5 +1,6 @@
 package com.github.aliandr13.zenmo.transaction;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -81,7 +82,7 @@ public class TxnJdbcRepository implements TxnRepository {
                 txn.getMerchant(),
                 txn.getStatus().name(),
                 txn.getNotes(),
-                txn.getCreatedAt());
+                Timestamp.from(txn.getCreatedAt()));
     }
 
     @Override

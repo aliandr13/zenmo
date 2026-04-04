@@ -1,6 +1,7 @@
 package com.github.aliandr13.zenmo.user;
 
 import com.github.aliandr13.zenmo.utils.CollectionUtils;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -48,7 +49,7 @@ public class AppUserJdbcRepository implements AppUserRepository {
                 user.getId(),
                 user.getEmail(),
                 user.getPasswordHash(),
-                user.getCreatedAt()
+                Timestamp.from(user.getCreatedAt())
         );
     }
 

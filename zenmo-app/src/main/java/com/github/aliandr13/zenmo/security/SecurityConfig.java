@@ -70,6 +70,7 @@ public class SecurityConfig {
             PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
+        provider.setHideUserNotFoundExceptions(true);
         return provider;
     }
 
@@ -78,7 +79,7 @@ public class SecurityConfig {
      */
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration configuration) throws Exception {
+            AuthenticationConfiguration configuration) {
         return configuration.getAuthenticationManager();
     }
 
@@ -105,7 +106,7 @@ public class SecurityConfig {
      * Defines security filter chain (stateless, JWT, route rules).
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
