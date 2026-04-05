@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-class CategoryJdbcRepositoryTest {
+class CategoryJdbcRepositoryIT {
 
     private static final UUID USER_A = UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc");
     private static final UUID USER_B = UUID.fromString("dddddddd-dddd-dddd-dddd-dddddddddddd");
