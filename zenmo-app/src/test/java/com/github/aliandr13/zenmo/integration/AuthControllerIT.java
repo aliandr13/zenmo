@@ -1,10 +1,10 @@
 package com.github.aliandr13.zenmo.integration;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.aliandr13.zenmo.auth.dto.LoginRequest;
 import com.github.aliandr13.zenmo.auth.dto.RegisterRequest;
 import com.github.aliandr13.zenmo.auth.dto.TokensResponse;
-import com.github.aliandr13.zenmo.common.ApiError;
 import com.github.aliandr13.zenmo.security.CurrentUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AuthControllerIT {
 
-    private static final ObjectMapper JSON = new ObjectMapper().findAndRegisterModules();
+    private static final ObjectMapper JSON = new ObjectMapper();
 
     @LocalServerPort
     private int port;
@@ -94,14 +94,15 @@ class AuthControllerIT {
                 .body(TokensResponse.class))
                 .isInstanceOfSatisfying(RestClientResponseException.class, ex -> {
                     assertThat(ex.getStatusCode().value()).isEqualTo(401);
-                    ApiError body = readApiError(ex);
-                    assertThat(body.message()).isEqualTo("Invalid credentials");
+                    assertThat(errorMessageFromBody(ex)).isEqualTo("Invalid credentials");
                 });
     }
 
-    private static ApiError readApiError(RestClientResponseException ex) {
+    private static String errorMessageFromBody(RestClientResponseException ex) {
         try {
-            return JSON.readValue(ex.getResponseBodyAsString(), ApiError.class);
+            JsonNode node = JSON.readTree(ex.getResponseBodyAsString());
+            JsonNode message = node.get("message");
+            return message == null || message.isNull() ? null : message.asText();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
