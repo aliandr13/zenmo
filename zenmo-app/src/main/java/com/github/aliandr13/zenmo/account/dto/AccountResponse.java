@@ -14,6 +14,8 @@ public record AccountResponse(UUID id,
                               AccountType type,
                               String currency,
                               BigDecimal creditLimit,
+                              BigDecimal currentBalance,
+                              BigDecimal statementBalance,
                               Integer paymentDueDay,
                               Integer closingDay,
                               boolean archived,
@@ -24,6 +26,7 @@ public record AccountResponse(UUID id,
     public static AccountResponse from(Account a) {
         return new AccountResponse(a.getId(), a.getName(), a.getType(),
                 a.getCurrency(), a.getCreditLimit(),
+                a.getCurrentBalance(), a.getStatementBalance(),
                 a.getPaymentDueDay(), a.getClosingDay(),
                 a.isArchived(), a.getCreatedAt());
     }

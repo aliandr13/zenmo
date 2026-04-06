@@ -23,6 +23,8 @@ public class Account {
     private AccountType type;
     private String currency;
     private BigDecimal creditLimit;
+    private BigDecimal currentBalance;
+    private BigDecimal statementBalance;
     private Integer paymentDueDay;
     private Integer closingDay;
     private boolean archived;

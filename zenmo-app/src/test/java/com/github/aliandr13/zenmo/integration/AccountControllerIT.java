@@ -49,7 +49,8 @@ class AccountControllerIT {
         RestClient client = RestClient.create();
 
         // CREATE account
-        AccountRequest create = new AccountRequest("Main Checking", CHECKING, "USD", null, null, 1);
+        AccountRequest create =
+                new AccountRequest("Main Checking", CHECKING, "USD", null, null, null, null, 1);
         AccountResponse created = client.post()
                 .uri(base() + "/api/accounts")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -75,6 +76,28 @@ class AccountControllerIT {
 
         assertThat(list).hasSize(1);
         assertThat(list.getFirst().id()).isEqualTo(created.id());
+
+        // UPDATE account (balances omitted in body — should stay as create defaults)
+        AccountRequest update =
+                new AccountRequest("Renamed Checking", CHECKING, "USD", null, null, null, null, 1);
+        AccountResponse updated = client.put()
+                .uri(base() + "/api/accounts/" + created.id())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .body(update)
+                .retrieve()
+                .body(AccountResponse.class);
+
+        assertThat(updated.name()).isEqualTo("Renamed Checking");
+        assertThat(updated.currentBalance()).isEqualByComparingTo(created.currentBalance());
+        assertThat(updated.statementBalance()).isEqualByComparingTo(created.statementBalance());
+
+        AccountResponse fetched = client.get()
+                .uri(base() + "/api/accounts/" + created.id())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .retrieve()
+                .body(AccountResponse.class);
+        assertThat(fetched.name()).isEqualTo("Renamed Checking");
 
         // DELETE ACCOUNT
         client.delete()

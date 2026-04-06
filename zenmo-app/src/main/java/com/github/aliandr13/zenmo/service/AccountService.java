@@ -7,6 +7,7 @@ import com.github.aliandr13.zenmo.common.NotFoundException;
 import com.github.aliandr13.zenmo.repository.AccountRepository;
 import com.github.aliandr13.zenmo.security.AuthFacade;
 import com.github.aliandr13.zenmo.security.CurrentUser;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -66,6 +67,10 @@ public class AccountService {
                 .type(request.type())
                 .currency(request.currency())
                 .creditLimit(request.creditLimit())
+                .currentBalance(
+                        request.currentBalance() != null ? request.currentBalance() : BigDecimal.ZERO)
+                .statementBalance(
+                        request.statementBalance() != null ? request.statementBalance() : BigDecimal.ZERO)
                 .paymentDueDay(request.paymentDueDay())
                 .closingDay(request.closingDay())
                 .archived(false)
@@ -73,6 +78,38 @@ public class AccountService {
                 .build();
         accountRepository.save(account);
         return AccountResponse.from(account);
+    }
+
+    /**
+     * Updates an existing account for the current user.
+     */
+    @Transactional
+    public AccountResponse update(UUID id, AccountRequest request) {
+        CurrentUser user = authFacade.currentUser();
+        Account existing = accountRepository.findByIdAndUserId(id, user.userId())
+                .orElseThrow(() -> new NotFoundException("Account not found"));
+        Account merged = Account.builder()
+                .id(existing.getId())
+                .userId(existing.getUserId())
+                .name(request.name())
+                .type(request.type())
+                .currency(request.currency())
+                .creditLimit(request.creditLimit())
+                .currentBalance(
+                        request.currentBalance() != null
+                                ? request.currentBalance()
+                                : existing.getCurrentBalance())
+                .statementBalance(
+                        request.statementBalance() != null
+                                ? request.statementBalance()
+                                : existing.getStatementBalance())
+                .paymentDueDay(request.paymentDueDay())
+                .closingDay(request.closingDay())
+                .archived(existing.isArchived())
+                .createdAt(existing.getCreatedAt())
+                .build();
+        accountRepository.update(merged);
+        return AccountResponse.from(merged);
     }
 
     /**

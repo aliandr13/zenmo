@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,6 +54,15 @@ public class AccountController {
     @PostMapping
     public ResponseEntity<AccountResponse> create(@Valid @RequestBody AccountRequest request) {
         return ResponseEntity.ok(accountService.create(request));
+    }
+
+    /**
+     * Updates an existing account.
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<AccountResponse> update(
+            @PathVariable UUID id, @Valid @RequestBody AccountRequest request) {
+        return ResponseEntity.ok(accountService.update(id, request));
     }
 
     /**

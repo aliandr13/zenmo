@@ -31,6 +31,11 @@ public interface AccountRepository {
     void save(Account account);
 
     /**
+     * Updates an existing account (row must belong to the account's user).
+     */
+    void update(Account account);
+
+    /**
      * Deletes an account by id.
      */
     void deleteById(UUID id);

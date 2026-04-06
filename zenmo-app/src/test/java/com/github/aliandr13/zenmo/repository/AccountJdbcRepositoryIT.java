@@ -58,6 +58,8 @@ class AccountJdbcRepositoryIT {
                 .type(AccountType.CHECKING)
                 .currency("USD")
                 .creditLimit(null)
+                .currentBalance(new BigDecimal("100.50"))
+                .statementBalance(new BigDecimal("99.00"))
                 .paymentDueDay(null)
                 .closingDay(15)
                 .archived(false)
@@ -75,6 +77,8 @@ class AccountJdbcRepositoryIT {
         assertThat(a.getType()).isEqualTo(AccountType.CHECKING);
         assertThat(a.getCurrency()).isEqualTo("USD");
         assertThat(a.getCreditLimit()).isNull();
+        assertThat(a.getCurrentBalance()).isEqualByComparingTo("100.50");
+        assertThat(a.getStatementBalance()).isEqualByComparingTo("99.00");
         assertThat(a.getPaymentDueDay()).isNull();
         assertThat(a.getClosingDay()).isEqualTo(15);
         assertThat(a.isArchived()).isFalse();
@@ -88,9 +92,11 @@ class AccountJdbcRepositoryIT {
                 .id(accountId)
                 .userId(USER_A)
                 .name("Visa")
-                .type(AccountType.CREDIT_CARD)
+                .type(AccountType.CREDIT)
                 .currency("EUR")
                 .creditLimit(new BigDecimal("5000.00"))
+                .currentBalance(BigDecimal.ZERO)
+                .statementBalance(new BigDecimal("-250.25"))
                 .paymentDueDay(10)
                 .closingDay(5)
                 .archived(true)
@@ -101,10 +107,12 @@ class AccountJdbcRepositoryIT {
 
         Account a = repository.findByIdAndUserId(accountId, USER_A).orElseThrow();
         assertThat(a.getCreditLimit()).isEqualByComparingTo("5000.00");
+        assertThat(a.getCurrentBalance()).isEqualByComparingTo("0");
+        assertThat(a.getStatementBalance()).isEqualByComparingTo("-250.25");
         assertThat(a.getPaymentDueDay()).isEqualTo(10);
         assertThat(a.getClosingDay()).isEqualTo(5);
         assertThat(a.isArchived()).isTrue();
-        assertThat(a.getType()).isEqualTo(AccountType.CREDIT_CARD);
+        assertThat(a.getType()).isEqualTo(AccountType.CREDIT);
     }
 
     @Test
@@ -147,6 +155,42 @@ class AccountJdbcRepositoryIT {
     }
 
     @Test
+    void update_persistsChanges() {
+        UUID accountId = UUID.randomUUID();
+        Account saved = sampleAccountBuilder(accountId, USER_A)
+                .name("Before")
+                .type(AccountType.CHECKING)
+                .currency("USD")
+                .build();
+        repository.save(saved);
+
+        Account merged = Account.builder()
+                .id(accountId)
+                .userId(USER_A)
+                .name("After")
+                .type(AccountType.SAVINGS)
+                .currency("GBP")
+                .creditLimit(new BigDecimal("1000.00"))
+                .currentBalance(new BigDecimal("25.00"))
+                .statementBalance(new BigDecimal("30.00"))
+                .paymentDueDay(null)
+                .closingDay(1)
+                .archived(false)
+                .createdAt(saved.getCreatedAt())
+                .build();
+        repository.update(merged);
+
+        Account a = repository.findByIdAndUserId(accountId, USER_A).orElseThrow();
+        assertThat(a.getName()).isEqualTo("After");
+        assertThat(a.getType()).isEqualTo(AccountType.SAVINGS);
+        assertThat(a.getCurrency()).isEqualTo("GBP");
+        assertThat(a.getCreditLimit()).isEqualByComparingTo("1000.00");
+        assertThat(a.getCurrentBalance()).isEqualByComparingTo("25.00");
+        assertThat(a.getStatementBalance()).isEqualByComparingTo("30.00");
+        assertThat(a.getCreatedAt()).isEqualTo(saved.getCreatedAt());
+    }
+
+    @Test
     void deleteById_removesRow() {
         UUID accountId = UUID.randomUUID();
         repository.save(sampleAccount(accountId, USER_A));
@@ -168,6 +212,8 @@ class AccountJdbcRepositoryIT {
                 .type(AccountType.CASH)
                 .currency("USD")
                 .creditLimit(null)
+                .currentBalance(BigDecimal.ZERO)
+                .statementBalance(BigDecimal.ZERO)
                 .paymentDueDay(null)
                 .closingDay(1)
                 .archived(false)

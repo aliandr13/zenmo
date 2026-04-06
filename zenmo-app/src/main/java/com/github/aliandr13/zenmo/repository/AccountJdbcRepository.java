@@ -24,7 +24,13 @@ public class AccountJdbcRepository implements AccountRepository {
     private static final String COUNT_BY_ID_AND_USER_ID = "SELECT COUNT(id) FROM account WHERE id = ? AND user_id = ?";
     private static final String DELETE_BY_ID = "DELETE FROM account WHERE id = ?";
     private static final String INSERT =
-            "INSERT INTO account (id, user_id, name, type, currency, credit_limit, payment_due_day, closing_day, archived, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO account (id, user_id, name, type, currency, credit_limit, current_balance, "
+                    + "statement_balance, payment_due_day, closing_day, archived, created_at) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String UPDATE =
+            "UPDATE account SET name = ?, type = ?, currency = ?, credit_limit = ?, current_balance = ?, "
+                    + "statement_balance = ?, payment_due_day = ?, closing_day = ?, archived = ? "
+                    + "WHERE id = ? AND user_id = ?";
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -54,10 +60,29 @@ public class AccountJdbcRepository implements AccountRepository {
                 account.getType().name(),
                 account.getCurrency(),
                 account.getCreditLimit(),
+                account.getCurrentBalance(),
+                account.getStatementBalance(),
                 account.getPaymentDueDay(),
                 account.getClosingDay(),
                 account.isArchived(),
                 Timestamp.from(account.getCreatedAt())
+        );
+    }
+
+    @Override
+    public void update(Account account) {
+        jdbcTemplate.update(UPDATE,
+                account.getName(),
+                account.getType().name(),
+                account.getCurrency(),
+                account.getCreditLimit(),
+                account.getCurrentBalance(),
+                account.getStatementBalance(),
+                account.getPaymentDueDay(),
+                account.getClosingDay(),
+                account.isArchived(),
+                account.getId(),
+                account.getUserId()
         );
     }
 
@@ -73,6 +98,8 @@ public class AccountJdbcRepository implements AccountRepository {
             .type(AccountType.valueOf(rs.getString("type")))
             .currency(rs.getString("currency"))
             .creditLimit(rs.getObject("credit_limit", BigDecimal.class))
+            .currentBalance(rs.getObject("current_balance", BigDecimal.class))
+            .statementBalance(rs.getObject("statement_balance", BigDecimal.class))
             .paymentDueDay(rs.getObject("payment_due_day", Integer.class))
             .closingDay(rs.getObject("closing_day", Integer.class))
             .archived(rs.getBoolean("archived"))

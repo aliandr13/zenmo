@@ -13,12 +13,15 @@ CREATE TABLE account
     user_id         VARCHAR(36)  NOT NULL REFERENCES app_user (id) ON DELETE CASCADE,
     name            VARCHAR(255) NOT NULL,
     type            VARCHAR(50)  NOT NULL,
-    currency        VARCHAR(3)   NOT NULL,
-    credit_limit    DECIMAL(19, 2),
-    payment_due_day INT,
+    currency          VARCHAR(3)     NOT NULL,
+    credit_limit      DECIMAL(19, 2),
+    current_balance   DECIMAL(19, 2) NOT NULL DEFAULT 0,
+    statement_balance DECIMAL(19, 2) NOT NULL DEFAULT 0,
+    payment_due_day   INT,
     closing_day     INT          NOT NULL DEFAULT 1,
     archived        BOOLEAN      NOT NULL DEFAULT FALSE,
-    created_at      TIMESTAMP    NOT NULL
+    created_at        TIMESTAMP      NOT NULL,
+    CONSTRAINT account_unique_name_type_per_user UNIQUE (user_id, name, type)
 );
 
 CREATE TABLE category
