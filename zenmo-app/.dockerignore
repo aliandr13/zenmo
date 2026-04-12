@@ -1,0 +1,10 @@
+# Same rules as repository-root `.dockerignore`. Default `docker build` uses context
+# at the repo root, which reads `../.dockerignore`; keep these files aligned.
+
+**/target/
+.git/
+.idea/
+**/*.iml
+**/README.md
+Dockerfile
+**/.DS_Store

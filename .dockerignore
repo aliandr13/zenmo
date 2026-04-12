@@ -1,0 +1,10 @@
+# Build context: repository root (see zenmo-app/Dockerfile, zenmo-migrate/Dockerfile).
+
+**/target/
+.git/
+.idea/
+**/*.iml
+**/README.md
+Dockerfile
+**/.DS_Store
+.mvn
