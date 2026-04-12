@@ -187,7 +187,8 @@ class AccountJdbcRepositoryIT {
         assertThat(a.getCreditLimit()).isEqualByComparingTo("1000.00");
         assertThat(a.getCurrentBalance()).isEqualByComparingTo("25.00");
         assertThat(a.getStatementBalance()).isEqualByComparingTo("30.00");
-        assertThat(a.getCreatedAt()).isEqualTo(saved.getCreatedAt());
+        assertThat(a.getCreatedAt().truncatedTo(ChronoUnit.MICROS))
+                .isEqualTo(saved.getCreatedAt().truncatedTo(ChronoUnit.MICROS));
     }
 
     @Test
