@@ -34,12 +34,15 @@ FROM eclipse-temurin:25-jre-jammy AS runtime
 
 WORKDIR /app
 
-RUN groupadd --system --gid 10001 app \
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system --gid 10001 app \
     && useradd --system --uid 10001 --gid app --home-dir /app --shell /usr/sbin/nologin app
 
 COPY --from=build /build/zenmo-app/target/zenmo.jar app.jar
 
-RUN chown app:app app.jar
+RUN mkdir -p /app/logs && chown app:app /app/logs app.jar
 
 USER app
 
