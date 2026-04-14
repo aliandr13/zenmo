@@ -19,6 +19,6 @@ public record AccountRequest(
         BigDecimal currentBalance,
         BigDecimal statementBalance,
         @Min(1) @Max(31) Integer paymentDueDay,
-        @NotNull @Min(1) @Max(31) Integer closingDay
+        @Min(1) @Max(31) Integer closingDay
 ) {
 }

@@ -18,9 +18,18 @@ CREATE TABLE account
     current_balance   DECIMAL(19, 2) NOT NULL DEFAULT 0,
     statement_balance DECIMAL(19, 2) NOT NULL DEFAULT 0,
     payment_due_day   INT,
-    closing_day     INT          NOT NULL DEFAULT 1,
+    closing_day INT,
     archived        BOOLEAN      NOT NULL DEFAULT FALSE,
     created_at        TIMESTAMP      NOT NULL,
+    CONSTRAINT account_type_check CHECK (type IN ('CHECKING', 'CASH', 'CREDIT', 'SAVINGS')),
+    CONSTRAINT account_payment_due_day_check CHECK (
+        (type <> 'CREDIT' AND payment_due_day IS NULL)
+            OR (type = 'CREDIT' AND payment_due_day IS NOT NULL AND payment_due_day >= 1 AND payment_due_day <= 31)
+        ),
+    CONSTRAINT account_closing_day_check CHECK (
+        (type <> 'CREDIT' AND closing_day IS NULL)
+            OR (type = 'CREDIT' AND closing_day IS NOT NULL AND closing_day >= 1 AND closing_day <= 31)
+        ),
     CONSTRAINT account_unique_name_type_per_user UNIQUE (user_id, name, type)
 );
 

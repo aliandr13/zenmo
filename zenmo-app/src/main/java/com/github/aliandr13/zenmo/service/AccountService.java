@@ -1,6 +1,7 @@
 package com.github.aliandr13.zenmo.service;
 
 import com.github.aliandr13.zenmo.account.Account;
+import com.github.aliandr13.zenmo.account.AccountType;
 import com.github.aliandr13.zenmo.account.dto.AccountRequest;
 import com.github.aliandr13.zenmo.account.dto.AccountResponse;
 import com.github.aliandr13.zenmo.common.NotFoundException;
@@ -60,6 +61,8 @@ public class AccountService {
     @Transactional
     public AccountResponse create(AccountRequest request) {
         CurrentUser user = authFacade.currentUser();
+        CreditSchedule schedule = resolveCreditSchedule(
+                request.type(), request.paymentDueDay(), request.closingDay());
         Account account = Account.builder()
                 .id(UUID.randomUUID())
                 .userId(user.userId())
@@ -71,8 +74,8 @@ public class AccountService {
                         request.currentBalance() != null ? request.currentBalance() : BigDecimal.ZERO)
                 .statementBalance(
                         request.statementBalance() != null ? request.statementBalance() : BigDecimal.ZERO)
-                .paymentDueDay(request.paymentDueDay())
-                .closingDay(request.closingDay())
+                .paymentDueDay(schedule.paymentDueDay())
+                .closingDay(schedule.closingDay())
                 .archived(false)
                 .createdAt(Instant.now())
                 .build();
@@ -88,6 +91,8 @@ public class AccountService {
         CurrentUser user = authFacade.currentUser();
         Account existing = accountRepository.findByIdAndUserId(id, user.userId())
                 .orElseThrow(() -> new NotFoundException("Account not found"));
+        CreditSchedule schedule = resolveCreditSchedule(
+                request.type(), request.paymentDueDay(), request.closingDay());
         Account merged = Account.builder()
                 .id(existing.getId())
                 .userId(existing.getUserId())
@@ -103,8 +108,8 @@ public class AccountService {
                         request.statementBalance() != null
                                 ? request.statementBalance()
                                 : existing.getStatementBalance())
-                .paymentDueDay(request.paymentDueDay())
-                .closingDay(request.closingDay())
+                .paymentDueDay(schedule.paymentDueDay())
+                .closingDay(schedule.closingDay())
                 .archived(existing.isArchived())
                 .createdAt(existing.getCreatedAt())
                 .build();
@@ -122,5 +127,30 @@ public class AccountService {
             throw new NotFoundException("Account not found for current user");
         }
         accountRepository.deleteById(id);
+    }
+
+    private record CreditSchedule(Integer paymentDueDay, Integer closingDay) {
+    }
+
+    /**
+     * Non-CREDIT accounts must not persist statement-cycle days (DB check constraints).
+     * CREDIT accounts require both fields in 1..31.
+     */
+    private static CreditSchedule resolveCreditSchedule(
+            AccountType type, Integer paymentDueDay, Integer closingDay) {
+        if (type != AccountType.CREDIT) {
+            return new CreditSchedule(null, null);
+        }
+        if (paymentDueDay == null || closingDay == null) {
+            throw new IllegalArgumentException(
+                    "CREDIT accounts require paymentDueDay and closingDay (each between 1 and 31)");
+        }
+        if (paymentDueDay < 1
+                || paymentDueDay > 31
+                || closingDay < 1
+                || closingDay > 31) {
+            throw new IllegalArgumentException("paymentDueDay and closingDay must be between 1 and 31");
+        }
+        return new CreditSchedule(paymentDueDay, closingDay);
     }
 }

@@ -61,7 +61,7 @@ class AccountJdbcRepositoryIT {
                 .currentBalance(new BigDecimal("100.50"))
                 .statementBalance(new BigDecimal("99.00"))
                 .paymentDueDay(null)
-                .closingDay(15)
+                .closingDay(null)
                 .archived(false)
                 .createdAt(created)
                 .build();
@@ -80,7 +80,7 @@ class AccountJdbcRepositoryIT {
         assertThat(a.getCurrentBalance()).isEqualByComparingTo("100.50");
         assertThat(a.getStatementBalance()).isEqualByComparingTo("99.00");
         assertThat(a.getPaymentDueDay()).isNull();
-        assertThat(a.getClosingDay()).isEqualTo(15);
+        assertThat(a.getClosingDay()).isNull();
         assertThat(a.isArchived()).isFalse();
         assertThat(a.getCreatedAt()).isEqualTo(created);
     }
@@ -174,7 +174,7 @@ class AccountJdbcRepositoryIT {
                 .currentBalance(new BigDecimal("25.00"))
                 .statementBalance(new BigDecimal("30.00"))
                 .paymentDueDay(null)
-                .closingDay(1)
+                .closingDay(null)
                 .archived(false)
                 .createdAt(saved.getCreatedAt())
                 .build();
@@ -216,7 +216,7 @@ class AccountJdbcRepositoryIT {
                 .currentBalance(BigDecimal.ZERO)
                 .statementBalance(BigDecimal.ZERO)
                 .paymentDueDay(null)
-                .closingDay(1)
+                .closingDay(null)
                 .archived(false)
                 .createdAt(Instant.now());
     }

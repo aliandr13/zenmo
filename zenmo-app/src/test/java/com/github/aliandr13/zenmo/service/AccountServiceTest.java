@@ -54,7 +54,7 @@ class AccountServiceTest {
                 .currentBalance(BigDecimal.ZERO)
                 .statementBalance(BigDecimal.ZERO)
                 .paymentDueDay(null)
-                .closingDay(1)
+                .closingDay(null)
                 .archived(false)
                 .createdAt(Instant.now())
                 .build();
@@ -82,7 +82,7 @@ class AccountServiceTest {
                 .currentBalance(BigDecimal.ZERO)
                 .statementBalance(BigDecimal.ZERO)
                 .paymentDueDay(null)
-                .closingDay(1)
+                .closingDay(null)
                 .archived(false)
                 .createdAt(Instant.now())
                 .build();
@@ -112,7 +112,7 @@ class AccountServiceTest {
         given(authFacade.currentUser()).willReturn(new CurrentUser(userId, "user@example.com"));
 
         AccountRequest request =
-                new AccountRequest("Main", AccountType.CHECKING, "USD", null, null, null, null, 1);
+                new AccountRequest("Main", AccountType.CHECKING, "USD", null, null, null, null, null);
 
         AccountResponse response = accountService.create(request);
 
@@ -137,7 +137,7 @@ class AccountServiceTest {
                 new BigDecimal("10.00"),
                 new BigDecimal("20.50"),
                 null,
-                1);
+                null);
 
         AccountResponse response = accountService.create(request);
 
@@ -162,14 +162,14 @@ class AccountServiceTest {
                 .currentBalance(new BigDecimal("50.00"))
                 .statementBalance(new BigDecimal("40.00"))
                 .paymentDueDay(null)
-                .closingDay(1)
+                .closingDay(null)
                 .archived(false)
                 .createdAt(Instant.parse("2024-01-01T00:00:00Z"))
                 .build();
         given(accountRepository.findByIdAndUserId(accountId, userId)).willReturn(Optional.of(existing));
 
         AccountRequest request =
-                new AccountRequest("New", AccountType.SAVINGS, "EUR", null, null, null, null, 1);
+                new AccountRequest("New", AccountType.SAVINGS, "EUR", null, null, null, null, null);
 
         AccountResponse response = accountService.update(accountId, request);
 
@@ -206,7 +206,7 @@ class AccountServiceTest {
                 .currentBalance(BigDecimal.ZERO)
                 .statementBalance(BigDecimal.ZERO)
                 .paymentDueDay(null)
-                .closingDay(1)
+                .closingDay(null)
                 .archived(false)
                 .createdAt(Instant.now())
                 .build();
@@ -220,7 +220,7 @@ class AccountServiceTest {
                 new BigDecimal("12.34"),
                 new BigDecimal("56.78"),
                 null,
-                1);
+                null);
 
         accountService.update(accountId, request);
 
@@ -238,7 +238,7 @@ class AccountServiceTest {
         given(accountRepository.findByIdAndUserId(accountId, userId)).willReturn(Optional.empty());
 
         AccountRequest request =
-                new AccountRequest("X", AccountType.CASH, "USD", null, null, null, null, 1);
+                new AccountRequest("X", AccountType.CASH, "USD", null, null, null, null, null);
 
         assertThatThrownBy(() -> accountService.update(accountId, request))
                 .isInstanceOf(NotFoundException.class)
@@ -269,6 +269,51 @@ class AccountServiceTest {
         assertThatThrownBy(() -> accountService.delete(accountId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("Account not found");
+
+        verifyNoMoreInteractions(accountRepository);
+    }
+
+    @Test
+    void createCreditAccountPersistsPaymentAndClosingDays() {
+        UUID userId = UUID.randomUUID();
+        given(authFacade.currentUser()).willReturn(new CurrentUser(userId, "user@example.com"));
+
+        AccountRequest request = new AccountRequest(
+                "Visa",
+                AccountType.CREDIT,
+                "USD",
+                new BigDecimal("5000.00"),
+                BigDecimal.ZERO,
+                new BigDecimal("-100.00"),
+                10,
+                5);
+
+        AccountResponse response = accountService.create(request);
+
+        assertThat(response.type()).isEqualTo(AccountType.CREDIT);
+        assertThat(response.paymentDueDay()).isEqualTo(10);
+        assertThat(response.closingDay()).isEqualTo(5);
+        verify(accountRepository).save(any(Account.class));
+    }
+
+    @Test
+    void createThrowsWhenCreditMissingClosingDay() {
+        UUID userId = UUID.randomUUID();
+        given(authFacade.currentUser()).willReturn(new CurrentUser(userId, "user@example.com"));
+
+        AccountRequest request = new AccountRequest(
+                "Visa",
+                AccountType.CREDIT,
+                "USD",
+                new BigDecimal("5000.00"),
+                null,
+                null,
+                15,
+                null);
+
+        assertThatThrownBy(() -> accountService.create(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("CREDIT accounts require");
 
         verifyNoMoreInteractions(accountRepository);
     }

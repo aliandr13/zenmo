@@ -50,7 +50,7 @@ class AccountControllerIT {
 
         // CREATE account
         AccountRequest create =
-                new AccountRequest("Main Checking", CHECKING, "USD", null, null, null, null, 1);
+                new AccountRequest("Main Checking", CHECKING, "USD", null, null, null, null, null);
         AccountResponse created = client.post()
                 .uri(base() + "/api/accounts")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -79,7 +79,7 @@ class AccountControllerIT {
 
         // UPDATE account (balances omitted in body — should stay as create defaults)
         AccountRequest update =
-                new AccountRequest("Renamed Checking", CHECKING, "USD", null, null, null, null, 1);
+                new AccountRequest("Renamed Checking", CHECKING, "USD", null, null, null, null, null);
         AccountResponse updated = client.put()
                 .uri(base() + "/api/accounts/" + created.id())
                 .contentType(MediaType.APPLICATION_JSON)

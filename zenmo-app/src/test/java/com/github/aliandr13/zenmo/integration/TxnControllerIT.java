@@ -59,7 +59,7 @@ class TxnControllerIT {
         RestClient client = RestClient.create();
 
         AccountRequest accountRequest =
-                new AccountRequest("Main Checking", CHECKING, "USD", null, null, null, null, 1);
+                new AccountRequest("Main Checking", CHECKING, "USD", null, null, null, null, null);
         AccountResponse account = client.post()
                 .uri(base() + "/api/accounts")
                 .contentType(MediaType.APPLICATION_JSON)
