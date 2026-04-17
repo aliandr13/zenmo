@@ -27,7 +27,7 @@ class AccountControllerIT {
     }
 
     private String loginAndGetToken() {
-        RestClient client = RestClient.create();
+        RestClient client = IntegrationTestRestClient.create();
         client.post()
                 .uri(base() + "/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -46,7 +46,7 @@ class AccountControllerIT {
     @Test
     void createAndListAccounts() {
         String token = loginAndGetToken();
-        RestClient client = RestClient.create();
+        RestClient client = IntegrationTestRestClient.create();
 
         // CREATE account
         AccountRequest create =

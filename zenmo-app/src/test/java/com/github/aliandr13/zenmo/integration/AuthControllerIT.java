@@ -26,7 +26,7 @@ class AuthControllerIT {
 
     @Test
     void registerLoginAndMeFlowWorks() {
-        RestClient client = RestClient.create();
+        RestClient client = IntegrationTestRestClient.create();
 
         // register
         RegisterRequest registerRequest = new RegisterRequest("test@example.com", "password123");
@@ -71,7 +71,7 @@ class AuthControllerIT {
 
     @Test
     void loginWithWrongPasswordReturns401InvalidCredentials() {
-        RestClient client = RestClient.create();
+        RestClient client = IntegrationTestRestClient.create();
         RegisterRequest registerRequest = new RegisterRequest("wrongpwd-user@example.com", "correct-secret");
         client.post()
                 .uri("http://localhost:" + port + "/api/auth/register")
@@ -85,7 +85,7 @@ class AuthControllerIT {
     }
 
     private void assertLoginReturns401InvalidCredentials(LoginRequest loginRequest) {
-        RestClient client = RestClient.create();
+        RestClient client = IntegrationTestRestClient.create();
         assertThatThrownBy(() -> client.post()
                 .uri("http://localhost:" + port + "/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
