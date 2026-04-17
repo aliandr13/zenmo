@@ -45,10 +45,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String email = claims.get("email", String.class);
                 String typ = claims.get("typ", String.class);
 
-                if ("access".equals(typ)
-                        && subject != null
-                        && email != null
-                        && SecurityContextHolder.getContext().getAuthentication() == null) {
+                // Do not require an empty SecurityContext: AnonymousAuthenticationFilter may run
+                // before this filter, leaving a non-null anonymous Authentication in the holder.
+                if ("access".equals(typ) && subject != null && email != null) {
                     UUID userId = UUID.fromString(subject);
                     UserPrincipal principal = new UserPrincipal(userId, email, "<jwt>");
                     UsernamePasswordAuthenticationToken authentication =
