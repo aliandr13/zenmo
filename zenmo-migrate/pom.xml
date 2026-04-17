@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.github.aliandr13</groupId>
         <artifactId>zenmo-parent</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>zenmo-migrate</artifactId>
@@ -37,7 +37,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <release>${maven.compiler.release}</release>
+                    <release>${java.version}</release>
                 </configuration>
             </plugin>
             <plugin>
