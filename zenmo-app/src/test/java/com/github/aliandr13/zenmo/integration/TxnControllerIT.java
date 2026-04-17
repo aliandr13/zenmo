@@ -37,7 +37,7 @@ class TxnControllerIT {
     }
 
     private String loginAndGetToken() {
-        RestClient client = RestClient.create();
+        RestClient client = IntegrationTestRestClient.create();
         client.post()
                 .uri(base() + "/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -56,7 +56,7 @@ class TxnControllerIT {
     @Test
     void createListGetAndDeleteTransaction() {
         String token = loginAndGetToken();
-        RestClient client = RestClient.create();
+        RestClient client = IntegrationTestRestClient.create();
 
         AccountRequest accountRequest =
                 new AccountRequest("Main Checking", CHECKING, "USD", null, null, null, null, null);

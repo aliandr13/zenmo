@@ -22,12 +22,12 @@ JAVA_OPTS="
 -Dspring.main.lazy-initialization=true
 "
 
-# Spring Boot / Tomcat tuning for low RAM
+# Spring Boot / Jetty tuning for low RAM
 SPRING_OPTS="
--Dserver.tomcat.threads.max=20
--Dserver.tomcat.accept-count=40
--Dserver.tomcat.max-connections=200
--Dserver.tomcat.keep-alive-timeout=10s
+-Dserver.jetty.threads.max=20
+-Dserver.jetty.threads.max-queue-capacity=40
+-Dserver.jetty.max-connections=200
+-Dserver.jetty.connection-idle-timeout=10s
 "
 
 # Log file
