@@ -22,17 +22,17 @@ services:
     command: [ "postgres", "-c", "config_file=/etc/postgresql/postgresql.conf" ]
 
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-zenmo}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-zenmo}
-      POSTGRES_DB: ${POSTGRES_DB:-zenmo}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       # Standard PGDATA path. If upgrading from a volume mounted on /var/lib/postgresql, migrate data once.
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
       - ./postgres-conf/postgresql.conf:/etc/postgresql/postgresql.conf:ro
     networks:
       - internal
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-zenmo}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 20s
       timeout: 5s
       retries: 5
@@ -60,7 +60,6 @@ services:
     restart: unless-stopped
     environment:
       JAVA_TOOL_OPTIONS: >-
-        -server
         -Xms256m
         -Xmx768m
         -XX:MaxMetaspaceSize=192m
@@ -93,7 +92,7 @@ services:
       - internal
     healthcheck:
       test: [ "CMD", "curl", "-fsS", "http://127.0.0.1:8080/actuator/health" ]
-      interval: 20s
+      interval: 30s
       timeout: 5s
       retries: 5
       start_period: 15s
@@ -105,6 +104,8 @@ services:
   ui:
     image: ghcr.io/aliandr13/zenmo-ui:latest
     restart: unless-stopped
+    environment:
+      CADDY_ACME_EMAIL: ${CADDY_ACME_EMAIL}
     depends_on:
       api:
         condition: service_healthy
