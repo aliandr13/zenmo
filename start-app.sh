@@ -9,9 +9,8 @@ JAR_FILE="${APP_DIR}/zenmo.jar"
 
 # JVM options optimized for low RAM
 JAVA_OPTS="
--server
 -Xms128m
--Xmx256m
+-Xmx512m
 -XX:MaxMetaspaceSize=128m
 -XX:ReservedCodeCacheSize=64m
 -Xss256k

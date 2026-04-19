@@ -12,7 +12,7 @@ public final class MigrateMain {
         String url = firstNonBlank(
                 System.getenv("ZENMO_DATASOURCE_URL"),
                 System.getProperty("zenmo.datasource.url"),
-                "jdbc:postgresql://localhost:5432/zenmo");
+                "jdbc:postgresql://localhost:5432/zenmodb");
         String user = firstNonBlank(
                 System.getenv("ZENMO_DATASOURCE_USERNAME"),
                 System.getProperty("zenmo.datasource.username"),
@@ -20,7 +20,7 @@ public final class MigrateMain {
         String password = firstNonBlank(
                 System.getenv("ZENMO_DATASOURCE_PASSWORD"),
                 System.getProperty("zenmo.datasource.password"),
-                "zenmo");
+                "zenmo-pass");
 
         Flyway flyway = Flyway.configure()
                 .dataSource(url, user, password)
