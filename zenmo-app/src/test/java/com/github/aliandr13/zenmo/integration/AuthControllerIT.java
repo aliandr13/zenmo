@@ -1,7 +1,5 @@
 package com.github.aliandr13.zenmo.integration;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.aliandr13.zenmo.auth.dto.LoginRequest;
 import com.github.aliandr13.zenmo.auth.dto.RegisterRequest;
 import com.github.aliandr13.zenmo.auth.dto.TokensResponse;
@@ -13,13 +11,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AuthControllerIT {
 
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final JsonMapper JSON = JsonMapper.builder().build();
 
     @LocalServerPort
     private int port;
@@ -99,13 +99,9 @@ class AuthControllerIT {
     }
 
     private static String errorMessageFromBody(RestClientResponseException ex) {
-        try {
-            JsonNode node = JSON.readTree(ex.getResponseBodyAsString());
-            JsonNode message = node.get("message");
-            return message == null || message.isNull() ? null : message.asText();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        JsonNode node = JSON.readTree(ex.getResponseBodyAsString());
+        JsonNode message = node.get("message");
+        return message == null || message.isNull() ? null : message.asString();
     }
 }
 
