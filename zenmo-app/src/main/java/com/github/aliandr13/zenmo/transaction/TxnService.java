@@ -1,11 +1,13 @@
 package com.github.aliandr13.zenmo.transaction;
 
+import com.github.aliandr13.zenmo.account.Account;
 import com.github.aliandr13.zenmo.common.NotFoundException;
 import com.github.aliandr13.zenmo.repository.AccountRepository;
 import com.github.aliandr13.zenmo.security.AuthFacade;
 import com.github.aliandr13.zenmo.security.CurrentUser;
 import com.github.aliandr13.zenmo.transaction.dto.TxnRequest;
 import com.github.aliandr13.zenmo.transaction.dto.TxnResponse;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
@@ -80,12 +82,20 @@ public class TxnService {
 
     /**
      * Creates a new transaction for the current user.
+     *
+     * <p>A {@link TransactionStatus#POSTED} transaction adds its signed amount to the account's current
+     * balance (negative = money out, positive = money in). A pending transaction leaves the balance as is.
      */
     @Transactional
     public TxnResponse create(TxnRequest request) {
         CurrentUser user = authFacade.currentUser();
-        if (!accountRepository.existsByIdAndUserId(request.accountId(), user.userId())) {
-            throw new NotFoundException("Account not found");
+        Account account = accountRepository
+                .findByIdAndUserId(request.accountId(), user.userId())
+                .orElseThrow(() -> new NotFoundException("Account not found"));
+        if (!account.getCurrency().equalsIgnoreCase(request.currency())) {
+            throw new IllegalArgumentException(
+                    "Transaction currency " + request.currency()
+                            + " does not match account currency " + account.getCurrency());
         }
         Txn txn = new Txn(
                 UUID.randomUUID(),
@@ -100,21 +110,29 @@ public class TxnService {
                 request.merchant(),
                 request.status(),
                 request.notes(),
-                java.time.Instant.now()
+                Instant.now()
         );
         txnRepository.save(txn);
+        if (txn.getStatus() == TransactionStatus.POSTED) {
+            accountRepository.adjustBalance(txn.getAccountId(), user.userId(), txn.getAmount());
+        }
         return TxnResponse.from(txn);
     }
 
     /**
      * Deletes a transaction by id for the current user.
+     *
+     * <p>Deleting a {@link TransactionStatus#POSTED} transaction reverses its effect on the account balance.
      */
     @Transactional
     public void delete(UUID id) {
         CurrentUser user = authFacade.currentUser();
-        if (!txnRepository.existsByIdAndUserId(id, user.userId())) {
-            throw new NotFoundException("Transaction not found");
-        }
+        Txn txn = txnRepository
+                .findByIdAndUserId(id, user.userId())
+                .orElseThrow(() -> new NotFoundException("Transaction not found"));
         txnRepository.deleteById(id);
+        if (txn.getStatus() == TransactionStatus.POSTED) {
+            accountRepository.adjustBalance(txn.getAccountId(), user.userId(), txn.getAmount().negate());
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.github.aliandr13.zenmo.repository;
 
 import com.github.aliandr13.zenmo.account.Account;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,6 +35,13 @@ public interface AccountRepository {
      * Updates an existing account (row must belong to the account's user).
      */
     void update(Account account);
+
+    /**
+     * Atomically adds {@code delta} to the account's current balance (negative delta decreases it).
+     *
+     * @return number of rows updated (0 when the account does not exist for the user)
+     */
+    int adjustBalance(UUID id, UUID userId, BigDecimal delta);
 
     /**
      * Deletes an account by id.

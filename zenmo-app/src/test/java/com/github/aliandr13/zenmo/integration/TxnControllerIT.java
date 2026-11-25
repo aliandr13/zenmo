@@ -12,15 +12,19 @@ import com.github.aliandr13.zenmo.transaction.dto.TxnResponse;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 import static com.github.aliandr13.zenmo.account.AccountType.CHECKING;
+import static com.github.aliandr13.zenmo.account.AccountType.CREDIT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class TxnControllerIT {
@@ -37,17 +41,18 @@ class TxnControllerIT {
     }
 
     private String loginAndGetToken() {
+        String email = "txn-" + UUID.randomUUID() + "@example.com";
         RestClient client = IntegrationTestRestClient.create();
         client.post()
                 .uri(base() + "/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new RegisterRequest("txn@example.com", "password123"))
+                .body(new RegisterRequest(email, "password123"))
                 .retrieve()
                 .toBodilessEntity();
         TokensResponse tokens = client.post()
                 .uri(base() + "/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new LoginRequest("txn@example.com", "password123"))
+                .body(new LoginRequest(email, "password123"))
                 .retrieve()
                 .body(TokensResponse.class);
         return tokens.accessToken();
@@ -133,5 +138,109 @@ class TxnControllerIT {
                 });
         assertThat(pageAfterDelete.totalElements()).isZero();
         assertThat(pageAfterDelete.content()).isEmpty();
+    }
+
+    @Test
+    void postedTransactionChangesBalanceAndDeleteRestoresIt() {
+        String token = loginAndGetToken();
+        AccountResponse account = createAccount(token,
+                new AccountRequest("Checking", CHECKING, "USD", null, new BigDecimal("1000.00"), null, null, null));
+
+        TxnResponse purchase = createTxn(token, account.id(), "-50.00", "USD", TransactionStatus.POSTED);
+        assertThat(getAccount(token, account.id()).currentBalance()).isEqualByComparingTo("950.00");
+
+        TxnResponse income = createTxn(token, account.id(), "200.00", "USD", TransactionStatus.POSTED);
+        assertThat(getAccount(token, account.id()).currentBalance()).isEqualByComparingTo("1150.00");
+
+        deleteTxn(token, purchase.id());
+        assertThat(getAccount(token, account.id()).currentBalance()).isEqualByComparingTo("1200.00");
+
+        deleteTxn(token, income.id());
+        assertThat(getAccount(token, account.id()).currentBalance()).isEqualByComparingTo("1000.00");
+    }
+
+    @Test
+    void pendingTransactionDoesNotChangeBalance() {
+        String token = loginAndGetToken();
+        AccountResponse account = createAccount(token,
+                new AccountRequest("Checking", CHECKING, "USD", null, new BigDecimal("1000.00"), null, null, null));
+
+        TxnResponse pending = createTxn(token, account.id(), "-50.00", "USD", TransactionStatus.PENDING);
+        assertThat(getAccount(token, account.id()).currentBalance()).isEqualByComparingTo("1000.00");
+
+        deleteTxn(token, pending.id());
+        assertThat(getAccount(token, account.id()).currentBalance()).isEqualByComparingTo("1000.00");
+    }
+
+    @Test
+    void creditCardPurchaseMakesBalanceMoreNegative() {
+        String token = loginAndGetToken();
+        AccountResponse card = createAccount(token, new AccountRequest(
+                "Visa", CREDIT, "USD", new BigDecimal("5000.00"), new BigDecimal("-200.00"), null, 10, 5));
+
+        createTxn(token, card.id(), "-50.00", "USD", TransactionStatus.POSTED);
+        assertThat(getAccount(token, card.id()).currentBalance()).isEqualByComparingTo("-250.00");
+
+        createTxn(token, card.id(), "100.00", "USD", TransactionStatus.POSTED);
+        assertThat(getAccount(token, card.id()).currentBalance()).isEqualByComparingTo("-150.00");
+    }
+
+    @Test
+    void currencyMismatchIsRejectedAndBalanceUnchanged() {
+        String token = loginAndGetToken();
+        AccountResponse account = createAccount(token,
+                new AccountRequest("Checking", CHECKING, "USD", null, new BigDecimal("1000.00"), null, null, null));
+
+        assertThatThrownBy(() -> createTxn(token, account.id(), "-50.00", "EUR", TransactionStatus.POSTED))
+                .isInstanceOf(HttpClientErrorException.BadRequest.class);
+
+        assertThat(getAccount(token, account.id()).currentBalance()).isEqualByComparingTo("1000.00");
+        PageResponse page = IntegrationTestRestClient.create().get()
+                .uri(base() + "/api/transactions?size=10")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .retrieve()
+                .body(new ParameterizedTypeReference<PageResponse>() {
+                });
+        assertThat(page.totalElements()).isZero();
+    }
+
+    private AccountResponse createAccount(String token, AccountRequest request) {
+        return IntegrationTestRestClient.create().post()
+                .uri(base() + "/api/accounts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .body(request)
+                .retrieve()
+                .body(AccountResponse.class);
+    }
+
+    private AccountResponse getAccount(String token, UUID id) {
+        return IntegrationTestRestClient.create().get()
+                .uri(base() + "/api/accounts/" + id)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .retrieve()
+                .body(AccountResponse.class);
+    }
+
+    private TxnResponse createTxn(
+            String token, UUID accountId, String amount, String currency, TransactionStatus status) {
+        TxnRequest request = new TxnRequest(
+                accountId, null, LocalDate.now(), null, new BigDecimal(amount), currency,
+                "Test txn", null, status, null);
+        return IntegrationTestRestClient.create().post()
+                .uri(base() + "/api/transactions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .body(request)
+                .retrieve()
+                .body(TxnResponse.class);
+    }
+
+    private void deleteTxn(String token, UUID id) {
+        IntegrationTestRestClient.create().delete()
+                .uri(base() + "/api/transactions/" + id)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .retrieve()
+                .toBodilessEntity();
     }
 }

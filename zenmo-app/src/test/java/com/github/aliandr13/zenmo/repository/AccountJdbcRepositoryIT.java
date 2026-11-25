@@ -192,6 +192,44 @@ class AccountJdbcRepositoryIT {
     }
 
     @Test
+    void adjustBalance_addsPositiveAndNegativeDeltas() {
+        UUID accountId = UUID.randomUUID();
+        repository.save(sampleAccountBuilder(accountId, USER_A)
+                .currentBalance(new BigDecimal("1000.00"))
+                .statementBalance(new BigDecimal("10.00"))
+                .build());
+
+        assertThat(repository.adjustBalance(accountId, USER_A, new BigDecimal("-50.25"))).isEqualTo(1);
+        assertThat(repository.adjustBalance(accountId, USER_A, new BigDecimal("20.00"))).isEqualTo(1);
+
+        Account a = repository.findByIdAndUserId(accountId, USER_A).orElseThrow();
+        assertThat(a.getCurrentBalance()).isEqualByComparingTo("969.75");
+        assertThat(a.getStatementBalance()).isEqualByComparingTo("10.00");
+    }
+
+    @Test
+    void adjustBalance_canGoNegative() {
+        UUID accountId = UUID.randomUUID();
+        repository.save(sampleAccountBuilder(accountId, USER_A).currentBalance(new BigDecimal("-200.00")).build());
+
+        repository.adjustBalance(accountId, USER_A, new BigDecimal("-50.00"));
+
+        assertThat(repository.findByIdAndUserId(accountId, USER_A).orElseThrow().getCurrentBalance())
+                .isEqualByComparingTo("-250.00");
+    }
+
+    @Test
+    void adjustBalance_doesNothingForOtherUsersAccount() {
+        UUID accountId = UUID.randomUUID();
+        repository.save(sampleAccountBuilder(accountId, USER_A).currentBalance(new BigDecimal("100.00")).build());
+
+        assertThat(repository.adjustBalance(accountId, USER_B, new BigDecimal("-50.00"))).isZero();
+
+        assertThat(repository.findByIdAndUserId(accountId, USER_A).orElseThrow().getCurrentBalance())
+                .isEqualByComparingTo("100.00");
+    }
+
+    @Test
     void deleteById_removesRow() {
         UUID accountId = UUID.randomUUID();
         repository.save(sampleAccount(accountId, USER_A));

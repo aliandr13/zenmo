@@ -153,7 +153,7 @@ Request body:
 | `type`             | enum    | Yes      | `CHECKING`, `CASH`, `SAVINGS`, `CREDIT`        |
 | `currency`         | string  | Yes      | 3-letter code                                  |
 | `creditLimit`      | decimal | No       |                                                |
-| `currentBalance`   | decimal | No       | Defaults to `0`                                |
+| `currentBalance`   | decimal | No       | Defaults to `0`. For `CREDIT`, negative = owed |
 | `statementBalance` | decimal | No       | Defaults to `0`                                |
 | `paymentDueDay`    | integer | `CREDIT` | 1–31; required for `CREDIT`, must be empty otherwise |
 | `closingDay`       | integer | `CREDIT` | 1–31; required for `CREDIT`, must be empty otherwise |
@@ -189,14 +189,16 @@ Request body:
 | `categoryId`      | UUID    | No       |                         |
 | `transactionDate` | date    | Yes      | `YYYY-MM-DD`            |
 | `postDate`        | date    | No       | `YYYY-MM-DD`            |
-| `amount`          | decimal | Yes      |                         |
-| `currency`        | string  | Yes      | 3-letter code           |
+| `amount`          | decimal | Yes      | Signed: negative = money out (purchase), positive = money in (income, refund) |
+| `currency`        | string  | Yes      | 3-letter code; must match the account's currency (else `400`) |
 | `description`     | string  | Yes      | Max 500 chars           |
 | `merchant`        | string  | No       | Max 200 chars           |
 | `status`          | enum    | Yes      | `PENDING`, `POSTED`     |
 | `notes`           | string  | No       | Max 1000 chars          |
 
-> Note: creating a transaction does not currently change the account's balance (see `BACKLOG.md`, ZEN-002).
+**Balance rules:** creating a `POSTED` transaction adds `amount` to the account's `currentBalance` (for every
+account type, so a credit card purchase makes its balance more negative). Deleting a `POSTED` transaction reverses
+it. `PENDING` transactions never change the balance. `statementBalance` is not touched.
 
 ### Actuator
 

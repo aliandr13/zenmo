@@ -31,6 +31,8 @@ public class AccountJdbcRepository implements AccountRepository {
             "UPDATE account SET name = ?, type = ?, currency = ?, credit_limit = ?, current_balance = ?, "
                     + "statement_balance = ?, payment_due_day = ?, closing_day = ?, archived = ? "
                     + "WHERE id = ? AND user_id = ?";
+    private static final String ADJUST_BALANCE =
+            "UPDATE account SET current_balance = current_balance + ? WHERE id = ? AND user_id = ?";
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -84,6 +86,11 @@ public class AccountJdbcRepository implements AccountRepository {
                 account.getId(),
                 account.getUserId()
         );
+    }
+
+    @Override
+    public int adjustBalance(UUID id, UUID userId, BigDecimal delta) {
+        return jdbcTemplate.update(ADJUST_BALANCE, delta, id, userId);
     }
 
     @Override
