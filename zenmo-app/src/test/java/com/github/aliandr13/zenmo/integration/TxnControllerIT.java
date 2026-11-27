@@ -85,8 +85,7 @@ class TxnControllerIT {
                 "USD",
                 "Coffee shop",
                 null,
-                TransactionStatus.POSTED,
-                null
+                TransactionStatus.POSTED
         );
         TxnResponse created = client.post()
                 .uri(base() + "/api/transactions")
@@ -226,7 +225,7 @@ class TxnControllerIT {
             String token, UUID accountId, String amount, String currency, TransactionStatus status) {
         TxnRequest request = new TxnRequest(
                 accountId, null, LocalDate.now(), null, new BigDecimal(amount), currency,
-                "Test txn", null, status, null);
+                null, null, status);
         return IntegrationTestRestClient.create().post()
                 .uri(base() + "/api/transactions")
                 .contentType(MediaType.APPLICATION_JSON)

@@ -18,9 +18,8 @@ public record TxnRequest(
         LocalDate postDate,
         @NotNull BigDecimal amount,
         @NotBlank @Size(min = 3, max = 3) String currency,
-        @NotBlank @Size(max = 500) String description,
+        @Size(max = 500) String description,
         @Size(max = 200) String merchant,
-        @NotNull TransactionStatus status,
-        @Size(max = 1000) String notes
+        @NotNull TransactionStatus status
 ) {
 }

@@ -21,7 +21,6 @@ public record TxnResponse(
         String description,
         String merchant,
         TransactionStatus status,
-        String notes,
         Instant createdAt
 ) {
     /**
@@ -39,7 +38,6 @@ public record TxnResponse(
                 t.getDescription(),
                 t.getMerchant(),
                 t.getStatus(),
-                t.getNotes(),
                 t.getCreatedAt()
         );
     }

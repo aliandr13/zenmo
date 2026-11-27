@@ -109,7 +109,6 @@ public class TxnService {
                 request.description(),
                 request.merchant(),
                 request.status(),
-                request.notes(),
                 Instant.now()
         );
         txnRepository.save(txn);

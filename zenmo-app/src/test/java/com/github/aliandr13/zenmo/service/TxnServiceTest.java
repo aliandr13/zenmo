@@ -73,7 +73,6 @@ class TxnServiceTest {
                 "desc",
                 "merchant",
                 TransactionStatus.PENDING,
-                null,
                 Instant.now()
         );
         given(accountRepository.existsByIdAndUserId(accountId, userId)).willReturn(true);
@@ -118,7 +117,6 @@ class TxnServiceTest {
                 "desc",
                 "merchant",
                 TransactionStatus.PENDING,
-                null,
                 Instant.now()
         );
         given(txnRepository.findByIdAndUserId(txnId, userId)).willReturn(Optional.of(txn));
@@ -293,8 +291,7 @@ class TxnServiceTest {
                 currency,
                 "desc",
                 "merchant",
-                status,
-                null
+                status
         );
     }
 
@@ -311,7 +308,6 @@ class TxnServiceTest {
                 "desc",
                 null,
                 status,
-                null,
                 Instant.now()
         );
     }

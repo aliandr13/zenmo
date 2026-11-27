@@ -1,4 +1,4 @@
-CREATE TABLE txn
+CREATE TABLE transactions
 (
     id               UUID PRIMARY KEY        DEFAULT gen_random_uuid(),
     user_id          UUID           NOT NULL REFERENCES app_user (id) ON DELETE CASCADE,
@@ -6,15 +6,14 @@ CREATE TABLE txn
     category_id      UUID           REFERENCES category (id) ON DELETE SET NULL,
     transaction_date DATE           NOT NULL,
     post_date        DATE,
+    created_at       TIMESTAMPTZ    NOT NULL DEFAULT now(),
     amount           NUMERIC(19, 2) NOT NULL,
     currency         VARCHAR(3)     NOT NULL,
-    description      TEXT           NOT NULL,
     merchant         TEXT,
     status           TEXT           NOT NULL,
-    notes            TEXT,
-    created_at       TIMESTAMPTZ    NOT NULL DEFAULT now()
+    description      TEXT
 );
 
-CREATE INDEX txn_user_id_idx ON txn (user_id);
-CREATE INDEX txn_user_id_transaction_date_idx ON txn (user_id, transaction_date DESC);
-CREATE INDEX txn_account_id_idx ON txn (account_id);
+CREATE INDEX transactions_user_id_idx ON transactions (user_id);
+CREATE INDEX transactions_user_id_transaction_date_idx ON transactions (user_id, transaction_date DESC);
+CREATE INDEX transactions_account_id_idx ON transactions (account_id);
