@@ -1,5 +1,6 @@
 package com.github.aliandr13.zenmo.common;
 
+import com.github.aliandr13.zenmo.auth.InvalidRefreshTokenException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
@@ -81,6 +82,20 @@ class ApiExceptionHandlerTest {
         ApiError body = response.getBody();
         assertThat(body).isNotNull();
         assertThat(body.message()).isEqualTo("Invalid credentials");
+    }
+
+    @Test
+    void handleInvalidRefreshTokenReturnsUnauthorizedWithMessage() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        given(request.getRequestURI()).willReturn("/api/auth/refresh");
+
+        ResponseEntity<ApiError> response = handler.handleInvalidRefreshToken(
+                new InvalidRefreshTokenException("Refresh token expired or revoked"), request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().message()).isEqualTo("Refresh token expired or revoked");
+        assertThat(response.getBody().path()).isEqualTo("/api/auth/refresh");
     }
 
     @Test

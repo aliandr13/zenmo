@@ -87,8 +87,11 @@ Key properties:
 | `spring.datasource.password`    | `${SPRING_DATASOURCE_PASSWORD}` | DB password (dev: `zenmo-pass`)     |
 | `zenmo.jwt.secret`              | `${ZENMO_JWT_SECRET}`           | HS256 secret (**set in production**) |
 | `zenmo.jwt.issuer`              | `zenmo`                         | JWT issuer                          |
-| `zenmo.jwt.access-ttl-seconds`  | `900` (15 min)                  | Access token TTL                    |
-| `zenmo.jwt.refresh-ttl-seconds` | `2592000` (30 days)             | Refresh token TTL                   |
+| `zenmo.jwt.access-ttl-seconds`  | `900` (15 min; dev: 1 h)        | Access token TTL                    |
+| `zenmo.jwt.refresh-ttl-seconds` | `604800` (7 days; dev: 8 h)     | Refresh token TTL                   |
+| `zenmo.refresh-cookie.secure`   | `true` (dev: `false`)           | `Secure` flag on the refresh cookie; env `ZENMO_REFRESHCOOKIE_SECURE` |
+| `zenmo.refresh-cookie.name`     | `zenmo_refresh`                 | Refresh cookie name                 |
+| `zenmo.refresh-cookie.path`     | `/api/auth`                     | Refresh cookie path                 |
 
 CORS allows `http://localhost:5173`, `http://localhost:3000`, and `https://zenmo.fyi`.
 
@@ -126,13 +129,21 @@ Base URL: `http://localhost:8080` (or your `server.port`).
 `/api/auth/**` and `/actuator/health`, `/actuator/info` are public; every other endpoint requires the header
 `Authorization: Bearer <accessToken>` (`/api/auth/me` also needs the token to identify the user). Every resource is scoped to the current user.
 
+A missing, invalid or expired access token returns **401** with a JSON error body (clients should refresh and retry);
+403 means authenticated but not allowed.
+
+Register, login and refresh return both tokens in the JSON body (native clients) **and** set the refresh token as a
+cookie: `zenmo_refresh; HttpOnly; SameSite=Strict; Path=/api/auth` (+ `Secure` outside dev), used by the web UI.
+The refresh token rotates on every refresh; the previous one stops working.
+
 ### Auth
 
 | Method | Path                 | Auth | Description                                                                                    |
 |--------|----------------------|------|------------------------------------------------------------------------------------------------|
 | `POST` | `/api/auth/register` | No   | Body: `{ "email", "password" }` (password 8–200 chars); returns `{ "accessToken", "refreshToken" }` |
 | `POST` | `/api/auth/login`    | No   | Same body/response                                                                             |
-| `POST` | `/api/auth/refresh`  | No   | Body: `{ "refreshToken" }`; returns new tokens                                                 |
+| `POST` | `/api/auth/refresh`  | No   | Body `{ "refreshToken" }` or the `zenmo_refresh` cookie (body wins); returns new tokens + cookie. 401 if missing/invalid/expired/revoked |
+| `POST` | `/api/auth/logout`   | No   | Body `{ "refreshToken" }` or the cookie; revokes the token, clears the cookie; always 204        |
 | `GET`  | `/api/auth/me`       | Yes  | Current user                                                                                   |
 
 ### Accounts
