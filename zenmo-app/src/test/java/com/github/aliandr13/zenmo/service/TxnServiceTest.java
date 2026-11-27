@@ -22,6 +22,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -73,7 +75,6 @@ class TxnServiceTest {
                 "desc",
                 "merchant",
                 TransactionStatus.PENDING,
-                null,
                 Instant.now()
         );
         given(accountRepository.existsByIdAndUserId(accountId, userId)).willReturn(true);
@@ -118,7 +119,6 @@ class TxnServiceTest {
                 "desc",
                 "merchant",
                 TransactionStatus.PENDING,
-                null,
                 Instant.now()
         );
         given(txnRepository.findByIdAndUserId(txnId, userId)).willReturn(Optional.of(txn));
@@ -177,6 +177,34 @@ class TxnServiceTest {
         InOrder inOrder = inOrder(txnRepository, accountRepository);
         inOrder.verify(txnRepository).save(any(Txn.class));
         inOrder.verify(accountRepository).adjustBalance(accountId, userId, amount);
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"", "   ", "\t\n"})
+    void createStoresBlankDescriptionAsNull(String description) {
+        UUID userId = UUID.randomUUID();
+        UUID accountId = UUID.randomUUID();
+        givenUser(userId);
+        givenAccount(accountId, userId, AccountType.CHECKING, "USD");
+
+        TxnResponse response = txnService.create(
+                request(accountId, "-5.00", "USD", TransactionStatus.PENDING, description));
+
+        assertThat(response.description()).isNull();
+    }
+
+    @Test
+    void createTrimsDescription() {
+        UUID userId = UUID.randomUUID();
+        UUID accountId = UUID.randomUUID();
+        givenUser(userId);
+        givenAccount(accountId, userId, AccountType.CHECKING, "USD");
+
+        TxnResponse response = txnService.create(
+                request(accountId, "-5.00", "USD", TransactionStatus.PENDING, "  Coffee  "));
+
+        assertThat(response.description()).isEqualTo("Coffee");
     }
 
     @Test
@@ -284,6 +312,11 @@ class TxnServiceTest {
     }
 
     private static TxnRequest request(UUID accountId, String amount, String currency, TransactionStatus status) {
+        return request(accountId, amount, currency, status, "desc");
+    }
+
+    private static TxnRequest request(
+            UUID accountId, String amount, String currency, TransactionStatus status, String description) {
         return new TxnRequest(
                 accountId,
                 null,
@@ -291,10 +324,9 @@ class TxnServiceTest {
                 LocalDate.now(),
                 new BigDecimal(amount),
                 currency,
-                "desc",
+                description,
                 "merchant",
-                status,
-                null
+                status
         );
     }
 
@@ -311,7 +343,6 @@ class TxnServiceTest {
                 "desc",
                 null,
                 status,
-                null,
                 Instant.now()
         );
     }

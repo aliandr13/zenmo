@@ -21,20 +21,20 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class TxnJdbcRepository implements TxnRepository {
 
-    private static final String DELETE_BY_ID = "DELETE FROM txn WHERE id = ?";
-    private static final String COUNT_BY_ID_AND_USER = "SELECT COUNT(*) FROM txn WHERE id = ? AND user_id = ?";
-    private static final String GET_BY_ID_AND_USER = "SELECT * FROM txn WHERE id = ? AND user_id = ?";
-    private static final String GET_BY_USER_AND_DATE = "SELECT * FROM txn WHERE user_id = ? AND transaction_date BETWEEN ? AND ?";
-    private static final String COUNT_BY_USER_AND_DATE = "SELECT COUNT(1) FROM txn WHERE user_id = ? AND transaction_date BETWEEN ? AND ?";
+    private static final String DELETE_BY_ID = "DELETE FROM transactions WHERE id = ?";
+    private static final String COUNT_BY_ID_AND_USER = "SELECT COUNT(*) FROM transactions WHERE id = ? AND user_id = ?";
+    private static final String GET_BY_ID_AND_USER = "SELECT * FROM transactions WHERE id = ? AND user_id = ?";
+    private static final String GET_BY_USER_AND_DATE = "SELECT * FROM transactions WHERE user_id = ? AND transaction_date BETWEEN ? AND ?";
+    private static final String COUNT_BY_USER_AND_DATE = "SELECT COUNT(1) FROM transactions WHERE user_id = ? AND transaction_date BETWEEN ? AND ?";
     private static final String GET_BY_USER =
-            "SELECT * FROM txn WHERE user_id = ? ORDER BY transaction_date DESC, created_at DESC LIMIT ? OFFSET ?";
-    private static final String COUNT_BY_USER = "SELECT COUNT(1) FROM txn WHERE user_id = ?";
+            "SELECT * FROM transactions WHERE user_id = ? ORDER BY transaction_date DESC, created_at DESC LIMIT ? OFFSET ?";
+    private static final String COUNT_BY_USER = "SELECT COUNT(1) FROM transactions WHERE user_id = ?";
     private static final String GET_BY_USER_AND_ACCOUNT =
-            "SELECT * FROM txn WHERE user_id = ? AND account_id = ? ORDER BY transaction_date DESC, created_at DESC LIMIT ? OFFSET ?";
+            "SELECT * FROM transactions WHERE user_id = ? AND account_id = ? ORDER BY transaction_date DESC, created_at DESC LIMIT ? OFFSET ?";
     private static final String COUNT_BY_USER_AND_ACCOUNT =
-            "SELECT COUNT(1) FROM txn WHERE user_id = ? AND account_id = ?";
+            "SELECT COUNT(1) FROM transactions WHERE user_id = ? AND account_id = ?";
     private static final String INSERT =
-            "INSERT INTO txn (id, user_id, account_id, category_id, transaction_date, post_date, amount, currency, description, merchant, status, notes, created_at)VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO transactions (id, user_id, account_id, category_id, transaction_date, post_date, amount, currency, description, merchant, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -81,7 +81,6 @@ public class TxnJdbcRepository implements TxnRepository {
                 txn.getDescription(),
                 txn.getMerchant(),
                 txn.getStatus().name(),
-                txn.getNotes(),
                 Timestamp.from(txn.getCreatedAt()));
     }
 
@@ -120,7 +119,6 @@ public class TxnJdbcRepository implements TxnRepository {
                 .description(rs.getString("description"))
                 .merchant(rs.getString("merchant"))
                 .status(TransactionStatus.valueOf(rs.getString("status")))
-                .notes(rs.getString("notes"))
                 .createdAt(rs.getTimestamp("created_at").toInstant())
                 .build();
     };

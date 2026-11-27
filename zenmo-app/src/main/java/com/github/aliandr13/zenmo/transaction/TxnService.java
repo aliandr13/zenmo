@@ -7,6 +7,7 @@ import com.github.aliandr13.zenmo.security.AuthFacade;
 import com.github.aliandr13.zenmo.security.CurrentUser;
 import com.github.aliandr13.zenmo.transaction.dto.TxnRequest;
 import com.github.aliandr13.zenmo.transaction.dto.TxnResponse;
+import com.github.aliandr13.zenmo.utils.StringUtils;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -106,10 +107,9 @@ public class TxnService {
                 request.postDate(),
                 request.amount(),
                 request.currency(),
-                request.description(),
+                StringUtils.trimToNull(request.description()),
                 request.merchant(),
                 request.status(),
-                request.notes(),
                 Instant.now()
         );
         txnRepository.save(txn);

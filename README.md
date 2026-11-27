@@ -63,7 +63,7 @@ Migrations:
 | V2      | `refresh_token`                               |
 | V3      | `account`                                     |
 | V4      | `category`                                    |
-| V5      | `txn` (transactions)                          |
+| V5      | `transactions`                                |
 | V6      | Seed test user (`test@email.com`)             |
 
 ### 3. Configuration
@@ -202,10 +202,9 @@ Request body:
 | `postDate`        | date    | No       | `YYYY-MM-DD`            |
 | `amount`          | decimal | Yes      | Signed: negative = money out (purchase), positive = money in (income, refund) |
 | `currency`        | string  | Yes      | 3-letter code; must match the account's currency (else `400`) |
-| `description`     | string  | Yes      | Max 500 chars           |
+| `description`     | string  | No       | Max 500 chars; blank is stored as `null` |
 | `merchant`        | string  | No       | Max 200 chars           |
 | `status`          | enum    | Yes      | `PENDING`, `POSTED`     |
-| `notes`           | string  | No       | Max 1000 chars          |
 
 **Balance rules:** creating a `POSTED` transaction adds `amount` to the account's `currentBalance` (for every
 account type, so a credit card purchase makes its balance more negative). Deleting a `POSTED` transaction reverses

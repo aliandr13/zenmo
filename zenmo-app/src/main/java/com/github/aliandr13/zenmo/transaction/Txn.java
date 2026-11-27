@@ -29,6 +29,5 @@ public class Txn {
     private String description;
     private String merchant;
     private TransactionStatus status;
-    private String notes;
     private Instant createdAt;
 }

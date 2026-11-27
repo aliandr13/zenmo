@@ -54,7 +54,7 @@ CREATE TABLE refresh_token
     created_at TIMESTAMP    NOT NULL
 );
 
-CREATE TABLE txn
+CREATE TABLE transactions
 (
     id               VARCHAR(36) PRIMARY KEY,
     user_id          VARCHAR(36)    NOT NULL REFERENCES app_user (id) ON DELETE CASCADE,
@@ -64,9 +64,8 @@ CREATE TABLE txn
     post_date        DATE,
     amount           DECIMAL(19, 2) NOT NULL,
     currency         VARCHAR(3)     NOT NULL,
-    description      VARCHAR(500)   NOT NULL,
+    description      VARCHAR(500),
     merchant         VARCHAR(200),
     status           VARCHAR(50)    NOT NULL,
-    notes            VARCHAR(1000),
     created_at       TIMESTAMP      NOT NULL
 );
