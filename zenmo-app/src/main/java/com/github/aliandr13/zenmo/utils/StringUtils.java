@@ -29,6 +29,16 @@ public class StringUtils {
     }
 
     /**
+     * Null-safe trim that maps blank strings to null.
+     *
+     * @param source string to trim, can be null.
+     * @return trimmed string, or null if source is null or blank.
+     */
+    public static String trimToNull(String source) {
+        return source == null || source.isBlank() ? null : source.trim();
+    }
+
+    /**
      * Null-safe method to removed leading and trailing of the source string and convert to lower case.
      *
      * @param source string to normalize, can be null.
