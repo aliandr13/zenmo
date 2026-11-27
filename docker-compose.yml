@@ -81,6 +81,8 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       ZENMO_JWT_SECRET: ${ZENMO_JWT_SECRET:?JWT secret must be set}
+      # Secure refresh cookie (HTTPS). Set to false only when serving the stack over plain HTTP (non-localhost).
+      ZENMO_REFRESHCOOKIE_SECURE: ${ZENMO_REFRESHCOOKIE_SECURE:-true}
     volumes:
       - ${API_LOGS_PATH:-./logs/api}:/app/logs
     depends_on:

@@ -30,12 +30,14 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtFilter;
+    private final JsonAuthErrorHandler authErrorHandler;
 
     /**
      * Constructor.
      */
-    public SecurityConfig(JwtAuthenticationFilter jwtFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtFilter, JsonAuthErrorHandler authErrorHandler) {
         this.jwtFilter = jwtFilter;
+        this.authErrorHandler = authErrorHandler;
     }
 
     /**
@@ -104,6 +106,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                // 401 JSON for missing/expired tokens (lets clients refresh), 403 JSON for denied access
+                .exceptionHandling(eh -> eh
+                        .authenticationEntryPoint(authErrorHandler)
+                        .accessDeniedHandler(authErrorHandler))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

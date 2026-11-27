@@ -79,10 +79,10 @@ public class AuthService {
     public TokensResponse refresh(String refreshToken) {
         String hash = hashToken(refreshToken);
         RefreshToken stored = refreshTokens.findByTokenHash(hash)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
+                .orElseThrow(() -> new InvalidRefreshTokenException("Invalid refresh token"));
 
         if (stored.isRevoked() || stored.getExpiresAt().isBefore(Instant.now())) {
-            throw new IllegalArgumentException("Refresh token expired or revoked");
+            throw new InvalidRefreshTokenException("Refresh token expired or revoked");
         }
 
         AppUser user = users.findById(stored.getUserId()).orElseThrow(() -> new NotFoundException("User not found"));
@@ -90,6 +90,14 @@ public class AuthService {
         // Rotate token: delete old and issue new
         refreshTokens.delete(stored);
         return issueTokens(user);
+    }
+
+    /**
+     * Revokes the given refresh token. Unknown tokens are ignored, so logout always succeeds.
+     */
+    @Transactional
+    public void logout(String refreshToken) {
+        refreshTokens.findByTokenHash(hashToken(refreshToken)).ifPresent(refreshTokens::delete);
     }
 
     private TokensResponse issueTokens(AppUser user) {

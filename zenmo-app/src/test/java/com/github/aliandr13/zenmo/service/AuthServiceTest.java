@@ -1,6 +1,7 @@
 package com.github.aliandr13.zenmo.service;
 
 import com.github.aliandr13.zenmo.auth.AuthService;
+import com.github.aliandr13.zenmo.auth.InvalidRefreshTokenException;
 import com.github.aliandr13.zenmo.auth.RefreshToken;
 import com.github.aliandr13.zenmo.auth.RefreshTokenRepository;
 import com.github.aliandr13.zenmo.auth.dto.LoginRequest;
@@ -144,8 +145,55 @@ class AuthServiceTest {
         given(refreshTokens.findByTokenHash(any(String.class))).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.refresh("raw-refresh-token"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(InvalidRefreshTokenException.class)
                 .hasMessageContaining("Invalid refresh token");
+    }
+
+    @Test
+    void refreshThrowsWhenTokenExpired() {
+        RefreshToken stored = new RefreshToken(UUID.randomUUID(), UUID.randomUUID(), "hash",
+                Instant.now().minusSeconds(1), null, Instant.now().minusSeconds(3600));
+        given(refreshTokens.findByTokenHash(any(String.class))).willReturn(Optional.of(stored));
+
+        assertThatThrownBy(() -> authService.refresh("raw-refresh-token"))
+                .isInstanceOf(InvalidRefreshTokenException.class)
+                .hasMessageContaining("expired or revoked");
+        verify(refreshTokens, never()).delete(any());
+        verifyNoInteractions(users, jwtService);
+    }
+
+    @Test
+    void refreshThrowsWhenTokenRevoked() {
+        RefreshToken stored = new RefreshToken(UUID.randomUUID(), UUID.randomUUID(), "hash",
+                Instant.now().plusSeconds(3600), Instant.now(), Instant.now());
+        given(refreshTokens.findByTokenHash(any(String.class))).willReturn(Optional.of(stored));
+
+        assertThatThrownBy(() -> authService.refresh("raw-refresh-token"))
+                .isInstanceOf(InvalidRefreshTokenException.class)
+                .hasMessageContaining("expired or revoked");
+        verify(refreshTokens, never()).delete(any());
+    }
+
+    @Test
+    void logoutDeletesKnownRefreshToken() {
+        RefreshToken stored = new RefreshToken(UUID.randomUUID(), UUID.randomUUID(), "hash",
+                Instant.now().plusSeconds(3600), null, Instant.now());
+        ArgumentCaptor<String> hash = ArgumentCaptor.forClass(String.class);
+        given(refreshTokens.findByTokenHash(hash.capture())).willReturn(Optional.of(stored));
+
+        authService.logout("raw-refresh-token");
+
+        verify(refreshTokens).delete(eq(stored));
+        assertThat(hash.getValue()).hasSize(64).isNotEqualTo("raw-refresh-token");
+    }
+
+    @Test
+    void logoutIgnoresUnknownRefreshToken() {
+        given(refreshTokens.findByTokenHash(any(String.class))).willReturn(Optional.empty());
+
+        authService.logout("unknown");
+
+        verify(refreshTokens, never()).delete(any());
     }
 }
 

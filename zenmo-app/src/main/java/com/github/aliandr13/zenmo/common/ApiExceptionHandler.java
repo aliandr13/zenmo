@@ -1,5 +1,6 @@
 package com.github.aliandr13.zenmo.common;
 
+import com.github.aliandr13.zenmo.auth.InvalidRefreshTokenException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
@@ -62,6 +63,15 @@ public class ApiExceptionHandler {
     public ResponseEntity<ApiError> handleBadCredentials(
             BadCredentialsException ex, HttpServletRequest request) {
         return error(HttpStatus.UNAUTHORIZED, "Invalid credentials", request.getRequestURI(), null);
+    }
+
+    /**
+     * Handles missing, unknown, expired or revoked refresh tokens.
+     */
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ApiError> handleInvalidRefreshToken(
+            InvalidRefreshTokenException ex, HttpServletRequest request) {
+        return error(HttpStatus.UNAUTHORIZED, ex.getMessage(), request.getRequestURI(), null);
     }
 
     /**

@@ -17,7 +17,7 @@ import static org.mockito.Mockito.mock;
 class SecurityConfigTest {
 
     private final JwtAuthenticationFilter jwtFilter = mock(JwtAuthenticationFilter.class);
-    private final SecurityConfig securityConfig = new SecurityConfig(jwtFilter);
+    private final SecurityConfig securityConfig = new SecurityConfig(jwtFilter, mock(JsonAuthErrorHandler.class));
 
     @Test
     void userDetailsServiceLoadsUserAndWrapsInUserPrincipal() {
